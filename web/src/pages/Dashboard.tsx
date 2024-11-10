@@ -1,15 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Project } from '../types/project';
 import { projectApi } from '../api/projects';
 import { ProjectCard } from '../components/ProjectCard';
 import { useNavigate } from 'react-router-dom';
+import { ProjectFilters } from '../components/ProjectFilters';
 
 export const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortField, setSortField] = useState<'title' | 'createdAt'>('title');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -42,8 +45,19 @@ export const Dashboard: React.FC = () => {
     }
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div className="text-red-500">{error}</div>;
+  const filteredProjects = useMemo(() => {
+    return projects
+      .filter(project => 
+        project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.description.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      .sort((a, b) => {
+        if (sortField === 'title') {
+          return a.title.localeCompare(b.title);
+        }
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      });
+  }, [projects, searchTerm, sortField]);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -57,16 +71,34 @@ export const Dashboard: React.FC = () => {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {projects.map(project => (
-          <ProjectCard
-            key={project.id}
-            project={project}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
-        ))}
-      </div>
+      <ProjectFilters
+        onSearch={setSearchTerm}
+        onSortChange={setSortField}
+        sortField={sortField}
+      />
+
+      {loading ? (
+        <div className="flex justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
+        </div>
+      ) : error ? (
+        <div className="text-red-500 text-center py-8">{error}</div>
+      ) : filteredProjects.length === 0 ? (
+        <div className="text-gray-500 text-center py-8">
+          {searchTerm ? 'No matching projects found' : 'No projects yet'}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredProjects.map(project => (
+            <ProjectCard
+              key={project.id}
+              project={project}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

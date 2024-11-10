@@ -6,7 +6,7 @@ import { Dashboard } from '../pages/Dashboard';
 import { CreateProject } from '../pages/CreateProject';
 import { EditProject } from '../pages/EditProject';
 import { LoginForm } from '../components/LoginForm';
-import { RegisterForm } from '../components/RegisterForm';
+import { RegisterForm } from '../components/RegisterForm'; // Ensure this file exists at the specified path
 
 const router = createBrowserRouter([
   {

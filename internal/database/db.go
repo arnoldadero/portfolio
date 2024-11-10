@@ -4,6 +4,7 @@ import (
     "fmt"
     "log"
     "os"
+    "time"
 
     "gorm.io/driver/postgres"
     "gorm.io/gorm"
@@ -13,6 +14,9 @@ import (
 var DB *gorm.DB
 
 func Connect() {
+    maxRetries := 10
+    var err error
+    
     dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
         os.Getenv("DB_HOST"),
         os.Getenv("DB_USER"),
@@ -21,13 +25,23 @@ func Connect() {
         os.Getenv("DB_PORT"),
     )
 
-    db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+    for i := 0; i < maxRetries; i++ {
+        DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+        if err == nil {
+            break
+        }
+        log.Printf("Failed to connect to database (attempt %d/%d): %v", i+1, maxRetries, err)
+        time.Sleep(time.Second * 5)
+    }
+
     if err != nil {
-        log.Fatal("Failed to connect to database:", err)
+        log.Fatal("Failed to connect to database after multiple retries:", err)
     }
 
     // Auto migrate models
-    db.AutoMigrate(&models.Project{}, &models.BlogPost{})
+    if err := DB.AutoMigrate(&models.User{}, &models.Project{}, &models.BlogPost{}); err != nil {
+        log.Fatal("Failed to migrate database:", err)
+    }
 
-    DB = db
+    log.Println("Database connected and migrated successfully")
 }

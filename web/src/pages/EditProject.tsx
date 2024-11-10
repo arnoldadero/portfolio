@@ -7,7 +7,7 @@ import { CreateProjectInput, Project } from '../types/project';
 export const EditProject: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const [project, setProject] = useState<Project | null>(null);
+    const [project, setProject] = useState<Project | undefined>(undefined);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
