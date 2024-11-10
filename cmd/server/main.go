@@ -9,12 +9,13 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/arnoldadero/portfolio/internal/database"
 	"github.com/arnoldadero/portfolio/internal/handlers"
+	"github.com/arnoldadero/portfolio/internal/middleware"
 )
 
 func main() {
-	// Load environment variables
+	// Load environment variables from the project root
 	if err := godotenv.Load(); err != nil {
-		log.Println("No .env file found")
+		log.Fatal("Error loading .env file")
 	}
 
 	// Set Gin mode
@@ -22,7 +23,7 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	// Connect to database
+	// Connect to the database
 	database.Connect()
 
 	r := gin.Default()
@@ -39,19 +40,29 @@ func main() {
 		c.Next()
 	})
 
-	// Basic route for testing
+	r.Use(middleware.ErrorHandler())
+
+	// Public routes
+	r.POST("/register", handlers.Register)
+	r.POST("/login", handlers.Login)
+
+	// Protected routes
+	api := r.Group("/api")
+	api.Use(middleware.AuthRequired())
+	{
+		api.GET("/projects", handlers.GetProjects)
+		api.POST("/projects", handlers.CreateProject)
+		api.GET("/projects/:id", handlers.GetProjectByID)
+		api.PUT("/projects/:id", handlers.UpdateProject)
+		api.DELETE("/projects/:id", handlers.DeleteProject)
+	}
+
+	// Health check route
 	r.GET("/api/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"status": "ok",
 		})
 	})
-
-	// API routes
-	api := r.Group("/api")
-	{
-		api.GET("/projects", handlers.GetProjects)
-		api.POST("/projects", handlers.CreateProject)
-	}
 
 	// Start server
 	port := os.Getenv("PORT")
