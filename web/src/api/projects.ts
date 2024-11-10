@@ -1,15 +1,28 @@
-// src/api/projects.ts
-import axios from 'axios';
-import { Project } from '../types/project';
+import { client } from './client';
+import { Project, CreateProjectInput } from '../types/project';
 
-const API_URL = 'http://localhost:8080/api';
+export const projectApi = {
+    getAll: async (): Promise<Project[]> => {
+        const { data } = await client.get('/api/projects');
+        return data;
+    },
 
-export const getProjects = async (): Promise<Project[]> => {
-    const response = await axios.get(`${API_URL}/projects`);
-    return response.data;
-};
+    getById: async (id: number): Promise<Project> => {
+        const { data } = await client.get(`/api/projects/${id}`);
+        return data;
+    },
 
-export const getProject = async (id: number): Promise<Project> => {
-    const response = await axios.get(`${API_URL}/projects/${id}`);
-    return response.data;
+    create: async (project: CreateProjectInput): Promise<Project> => {
+        const { data } = await client.post('/api/projects', project);
+        return data;
+    },
+
+    update: async (id: number, project: Partial<CreateProjectInput>): Promise<Project> => {
+        const { data } = await client.put(`/api/projects/${id}`, project);
+        return data;
+    },
+
+    delete: async (id: number): Promise<void> => {
+        await client.delete(`/api/projects/${id}`);
+    }
 };

@@ -1,38 +1,69 @@
-// src/components/ProjectCard.tsx
-import { Box, Image, Heading, Text, Link, HStack } from '@chakra-ui/react';
-import { FaGithub, FaExternalLinkAlt } from 'react-icons/fa';
-import { Project } from '../types/project';
 import React from 'react';
+import { Project } from '../types/project';
 
 interface ProjectCardProps {
-    project: Project;
+  project: Project;
+  onEdit?: (project: Project) => void;
+  onDelete?: (id: number) => void;
 }
 
-export const ProjectCard = ({ project }: ProjectCardProps) => {
-    return (
-        <Box
-            maxW="sm"
-            borderWidth="1px"
-            borderRadius="lg"
-            overflow="hidden"
-            shadow="md"
-        >
-            <Image src={project.imageUrl} alt={project.title} />
-            <Box p="6">
-                <Heading size="md" mb={2}>{project.title}</Heading>
-                <Text mb={4}>{project.description}</Text>
-                <Text fontSize="sm" color="gray.600" mb={4}>
-                    {project.techStack}
-                </Text>
-                <HStack gap={4}>
-                    <Link href={project.githubUrl} target="_blank" rel="noopener noreferrer">
-                        <FaGithub />
-                    </Link>
-                    <Link href={project.liveUrl} target="_blank" rel="noopener noreferrer">
-                        <FaExternalLinkAlt />
-                    </Link>
-                </HStack>
-            </Box>
-        </Box>
-    );
+export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onEdit, onDelete }) => {
+  return (
+    <div className="border rounded-lg shadow-sm p-4 bg-white">
+      {project.imageUrl && (
+        <img 
+          src={project.imageUrl} 
+          alt={project.title} 
+          className="w-full h-48 object-cover rounded-md mb-4"
+        />
+      )}
+      <h3 className="text-xl font-semibold mb-2">{project.title}</h3>
+      <p className="text-gray-600 mb-4">{project.description}</p>
+      <div className="text-sm text-gray-500 mb-4">{project.techStack}</div>
+      
+      <div className="flex justify-between items-center">
+        <div className="space-x-2">
+          {project.liveUrl && (
+            <a 
+              href={project.liveUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 hover:text-blue-700"
+            >
+              Live Demo
+            </a>
+          )}
+          {project.githubUrl && (
+            <a 
+              href={project.githubUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-500 hover:text-gray-700"
+            >
+              GitHub
+            </a>
+          )}
+        </div>
+        
+        <div className="space-x-2">
+          {onEdit && (
+            <button
+              onClick={() => onEdit(project)}
+              className="text-blue-500 hover:text-blue-700"
+            >
+              Edit
+            </button>
+          )}
+          {onDelete && (
+            <button
+              onClick={() => onDelete(project.id)}
+              className="text-red-500 hover:text-red-700"
+            >
+              Delete
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 };

@@ -13,17 +13,12 @@ import (
 )
 
 func main() {
-	// Load environment variables from the project root
+	// Load environment variables
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("Error loading .env file")
 	}
 
-	// Set Gin mode
-	if os.Getenv("GIN_MODE") == "release" {
-		gin.SetMode(gin.ReleaseMode)
-	}
-
-	// Connect to the database
+	// Connect to database
 	database.Connect()
 
 	r := gin.Default()
@@ -48,7 +43,7 @@ func main() {
 
 	// Protected routes
 	api := r.Group("/api")
-	api.Use(middleware.AuthRequired())
+	api.Use(middleware.AuthMiddleware(os.Getenv("JWT_SECRET")))
 	{
 		api.GET("/projects", handlers.GetProjects)
 		api.POST("/projects", handlers.CreateProject)

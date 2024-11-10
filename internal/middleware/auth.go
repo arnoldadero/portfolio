@@ -1,36 +1,35 @@
 package middleware
 
 import (
-	"net/http"
-	"strings"
+    "net/http"
+    "strings"
 
-	"github.com/arnoldadero/portfolio/internal/utils"
-	"github.com/dgrijalva/jwt-go"
-	"github.com/gin-gonic/gin"
+    "github.com/gin-gonic/gin"
+    "github.com/golang-jwt/jwt/v4"
 )
 
-func AuthRequired() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		header := c.GetHeader("Authorization")
-		if header == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Authorization header missing"})
-			return
-		}
+func AuthMiddleware(secret string) gin.HandlerFunc {
+    return func(c *gin.Context) {
+        authHeader := c.GetHeader("Authorization")
+        if authHeader == "" {
+            c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header required"})
+            c.Abort()
+            return
+        }
 
-		tokenString := strings.TrimPrefix(header, "Bearer ")
-		token, err := utils.ValidateJWT(tokenString)
-		if err != nil || !token.Valid {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
-			return
-		}
+        tokenString := strings.Replace(authHeader, "Bearer ", "", 1)
+        token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+            return []byte(secret), nil
+        })
 
-		claims, ok := token.Claims.(jwt.MapClaims)
-		if !ok {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
-			return
-		}
+        if err != nil || !token.Valid {
+            c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+            c.Abort()
+            return
+        }
 
-		c.Set("user_id", claims["user_id"])
-		c.Next()
-	}
+        claims := token.Claims.(jwt.MapClaims)
+        c.Set("user_id", claims["user_id"])
+        c.Next()
+    }
 }
