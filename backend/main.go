@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -36,15 +37,29 @@ func main() {
 func initDB() {
 	var err error
 	dsn := os.Getenv("DATABASE_URL")
-	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if dsn == "" {
+		log.Fatal("DATABASE_URL environment variable is not set")
+	}
+
+	// Try connecting multiple times
+	for i := 0; i < 5; i++ {
+		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+		if err == nil {
+			break
+		}
+		log.Printf("Failed to connect to database (attempt %d/5): %v", i+1, err)
+		time.Sleep(time.Second * 2)
+	}
 	if err != nil {
-		log.Fatal("Failed to connect to database:", err)
+		log.Fatal("Failed to connect to database after 5 attempts:", err)
 	}
 
 	// Auto-migrate models
 	if err := db.AutoMigrate(&User{}, &Post{}, &Activity{}); err != nil {
 		log.Fatal("Failed to migrate database:", err)
 	}
+
+	log.Println("Successfully connected to database and migrated schemas")
 }
 
 func setupRouter() *gin.Engine {

@@ -1,5 +1,4 @@
-import React from 'react';
-import { Code2, Database, Globe, Layout, Server, Shield } from 'lucide-react';
+import { Code2, Globe, Layout, Server } from 'lucide-react';
 
 const skills = [
   {
@@ -13,19 +12,9 @@ const skills = [
     items: ["React", "TypeScript", "Next.js", "Tailwind CSS", "WebAssembly"]
   },
   {
-    category: "System Design",
-    icon: Database,
-    items: ["Microservices", "Docker", "Kubernetes", "AWS", "System Architecture"]
-  },
-  {
     category: "API Development",
     icon: Globe,
     items: ["RESTful APIs", "GraphQL", "API Gateway", "OpenAPI", "Protocol Buffers"]
-  },
-  {
-    category: "Security",
-    icon: Shield,
-    items: ["OAuth 2.0", "JWT", "HTTPS", "Security Best Practices"]
   },
   {
     category: "Tools & Practices",
@@ -36,32 +25,51 @@ const skills = [
 
 export default function Skills() {
   return (
-    <section id="skills" className="py-20 bg-white">
-      <div className="max-w-6xl mx-auto px-6">
-        <h2 className="text-3xl font-bold text-gray-900 mb-12">Technical Expertise</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <section id="skills" className="py-24 bg-white relative">
+      <div className="absolute inset-0 bg-gradient-to-b from-gray-50 to-white opacity-70 
+                      bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]" />
+      <div className="max-w-6xl mx-auto px-6 relative">
+        <h2 className="text-4xl font-bold text-gray-900 mb-4 text-center">Technical Expertise</h2>
+        <p className="text-gray-600 text-center mb-16 max-w-2xl mx-auto">
+          Specialized in modern web technologies and scalable architecture
+        </p>
+        <div className="grid md:grid-cols-2 gap-8">
           {skills.map((skill, index) => (
             <div 
               key={skill.category}
-              className="p-6 rounded-xl border border-gray-100 hover:border-indigo-100 bg-white shadow-sm hover:shadow-md transition-all duration-300"
+              className="group p-8 rounded-xl bg-white shadow-sm 
+                       hover:shadow-xl transition-all duration-500 hover:-translate-y-1
+                       relative before:absolute before:inset-0 before:rounded-xl
+                       before:border-2 before:border-transparent before:bg-gradient-to-r
+                       before:from-indigo-500 before:to-purple-500 before:[background-clip:padding-box]
+                       before:p-1 before:-z-10 isolate overflow-hidden"
               style={{
-                animation: 'fade-in-up 0.5s ease-out forwards',
-                animationDelay: `${index * 100}ms`,
-                animationFillMode: 'both'
+                animation: 'fade-in-up 0.8s ease-out forwards',
+                animationDelay: `${index * 200}ms`,
+                opacity: 0,
+                transform: 'translateY(20px)'
               }}
             >
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 rounded-lg bg-indigo-50">
-                  <skill.icon className="w-5 h-5 text-indigo-600" />
+              <div className="flex items-center gap-4 mb-6">
+                <div className="p-3 rounded-xl bg-gradient-to-r from-indigo-50 to-purple-50 
+                              group-hover:scale-110 transition-transform duration-500">
+                  <skill.icon className="w-6 h-6 text-indigo-600 group-hover:animate-pulse" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900">{skill.category}</h3>
+                <h3 className="text-xl font-bold text-gray-900 tracking-tight">{skill.category}</h3>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {skill.items.map((item) => (
+              <div className="flex flex-wrap gap-3">
+                {skill.items.map((item, itemIndex) => (
                   <span 
                     key={item} 
-                    className="px-3 py-1 bg-gray-50 text-gray-700 text-sm rounded-full
-                             hover:bg-indigo-50 hover:text-indigo-700 transition-colors duration-300"
+                    className="px-4 py-2 bg-gradient-to-r from-gray-50 to-white text-gray-700
+                             rounded-lg border border-gray-100 text-sm font-medium
+                             hover:border-indigo-200 hover:text-indigo-700 
+                             hover:shadow-md hover:scale-105 transition-all duration-300"
+                    style={{
+                      animation: 'fade-in 0.5s ease-out forwards',
+                      animationDelay: `${(index * 200) + (itemIndex * 100)}ms`,
+                      opacity: 0
+                    }}
                   >
                     {item}
                   </span>
@@ -71,6 +79,30 @@ export default function Skills() {
           ))}
         </div>
       </div>
+      
+      <style>{`
+        @keyframes fade-in-up {
+          from {
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+        
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+            transform: scale(0.9);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+      `}</style>
     </section>
   );
 }

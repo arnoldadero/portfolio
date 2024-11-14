@@ -1,4 +1,3 @@
-import React from 'react';
 import { ArrowRight } from 'lucide-react';
 
 export default function Hero() {
@@ -27,7 +26,7 @@ export default function Hero() {
           </div>
           <div className="relative group">
             <img 
-              src="https://images.unsplash.com/photo-1571171637578-41bc2dd41cd2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80"
+              src="https://i.postimg.cc/ThMvFtJt/Arnold-Profile-dev.jpg"
               alt="Developer workspace"
               className="rounded-2xl shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]"
             />

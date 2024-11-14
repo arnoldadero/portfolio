@@ -11,7 +11,7 @@ type User struct {
 	Name     string `json:"name"`
 	Email    string `json:"email" gorm:"unique"`
 	Password string `json:"-"`
-	Posts    []Post
+	Posts    []Post `json:"posts" gorm:"foreignKey:AuthorID"` // Add foreignKey definition
 }
 
 type Post struct {
@@ -21,7 +21,7 @@ type Post struct {
 	Excerpt    string    `json:"excerpt"`
 	Slug       string    `json:"slug" gorm:"unique"`
 	AuthorID   uint      `json:"author_id"`
-	Author     User      `json:"author"`
+	Author     User      `json:"author" gorm:"foreignKey:AuthorID"` // Add foreignKey definition
 	Tags       []string  `json:"tags" gorm:"type:text[]"`
 	CreatedAt  time.Time `json:"created_at"`
 	UpdatedAt  time.Time `json:"updated_at"`
@@ -33,7 +33,7 @@ type Activity struct {
 	Type        string    `json:"type"`
 	Description string    `json:"description"`
 	UserID      uint      `json:"user_id"`
-	User        User      `json:"user"`
+	User        User      `json:"user" gorm:"foreignKey:UserID"` // Add foreignKey definition
 	Links       []string  `json:"links" gorm:"type:text[]"`
 	CreatedAt   time.Time `json:"created_at"`
 }
