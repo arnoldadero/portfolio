@@ -1,29 +1,40 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
 
-export function Hero() {
+export default function Hero() {
   return (
-    <header className="relative overflow-hidden bg-gradient-to-b from-blue-50 to-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24 md:pt-32 md:pb-40">
-        <div className="text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-            Transparent Fisheries
-            <span className="text-blue-600"> Supply Chain</span>
-          </h1>
-          <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto">
-            Revolutionizing the fishing industry with blockchain technology for complete transparency, 
-            traceability, and sustainability.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="btn btn-primary inline-flex items-center">
-              Get Started
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </button>
-            <button className="btn btn-secondary">Learn More</button>
+    <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-white pt-16">
+      <div className="max-w-6xl mx-auto px-6 py-20">
+        <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className="space-y-8 animate-fade-in">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900">
+              Full-Stack Engineer
+              <span className="block text-indigo-600">Building the Future</span>
+            </h1>
+            <p className="text-xl text-gray-600">
+              Crafting robust, scalable solutions with Golang, JavaScript, and Rust. 
+              Passionate about performance, security, and exceptional user experiences.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <a href="#projects" className="button-primary">
+                View Projects
+                <ArrowRight className="w-4 h-4" />
+              </a>
+              <a href="#contact" className="button-secondary">
+                Get in Touch
+              </a>
+            </div>
+          </div>
+          <div className="relative group">
+            <img 
+              src="https://images.unsplash.com/photo-1571171637578-41bc2dd41cd2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80"
+              alt="Developer workspace"
+              className="rounded-2xl shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]"
+            />
+            <div className="absolute inset-0 rounded-2xl bg-indigo-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           </div>
         </div>
       </div>
-      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-white to-transparent" />
-    </header>
+    </section>
   );
 }

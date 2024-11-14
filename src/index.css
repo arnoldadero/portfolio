@@ -6,22 +6,60 @@
   html {
     scroll-behavior: smooth;
   }
-  
+
   body {
-    @apply antialiased text-gray-900;
+    @apply antialiased;
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
 @layer components {
-  .btn {
-    @apply inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm transition-colors duration-200;
+  .nav-link {
+    @apply relative text-gray-600 hover:text-indigo-600 transition-colors;
   }
   
-  .btn-primary {
-    @apply bg-blue-600 text-white hover:bg-blue-700;
+  .nav-link::after {
+    @apply content-[''] absolute left-0 bottom-[-4px] w-0 h-0.5 bg-indigo-600 transition-all duration-300;
   }
   
-  .btn-secondary {
-    @apply border-2 border-blue-600 text-blue-600 hover:bg-blue-50;
+  .nav-link:hover::after {
+    @apply w-full;
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 hover:scale-[1.02] hover:shadow-lg;
+  }
+
+  .button-primary {
+    @apply inline-flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-lg 
+           hover:bg-indigo-700 transition-all duration-300 hover:shadow-md 
+           active:transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .button-secondary {
+    @apply inline-flex items-center gap-2 bg-white text-indigo-600 px-6 py-3 rounded-lg 
+           border border-indigo-200 hover:bg-indigo-50 transition-all duration-300
+           active:transform active:scale-95;
+  }
+
+  .skill-tag {
+    @apply px-3 py-1 bg-gray-50 text-gray-700 text-sm rounded-full
+           transition-all duration-300 hover:bg-indigo-50 hover:text-indigo-700;
+  }
+
+  .form-input {
+    @apply w-full px-4 py-2 rounded-lg border border-gray-200 
+           focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 
+           transition-colors;
   }
 }
