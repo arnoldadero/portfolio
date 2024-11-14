@@ -1,7 +1,9 @@
 package main
 
 import (
+	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -9,8 +11,8 @@ import (
 
 func login(c *gin.Context) {
 	var input struct {
-		 EmailOrUsername string `json:"emailOrUsername" binding:"required"`
-		 Password       string `json:"password" binding:"required"`
+		EmailOrUsername string `json:"emailOrUsername" binding:"required"`
+		Password       string `json:"password" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -19,14 +21,26 @@ func login(c *gin.Context) {
 	}
 
 	var user User
-	// Try to find user by email or username
-	if err := db.Where("email = ? OR name = ?", input.EmailOrUsername, input.EmailOrUsername).First(&user).Error; err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+	if err := db.Debug().Where("email = ? OR name = ?", input.EmailOrUsername, input.EmailOrUsername).First(&user).Error; err != nil {
+		log.Printf("User not found: %v", err)
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "Invalid email/username or password",
+		})
 		return
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)); err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		log.Printf("Password mismatch for user %s: %v", user.Email, err)
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "Invalid email/username or password",
+		})
+		return
+	}
+
+	if !user.IsAdmin {
+		c.JSON(http.StatusForbidden, gin.H{
+			"error": "Account does not have admin privileges",
+		})
 		return
 	}
 
@@ -39,55 +53,10 @@ func login(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"token": token,
 		"user": gin.H{
-			"id":    user.ID,
-			"name":  user.Name,
-			"email": user.Email,
-			"isAdmin": true,
-		},
-	})
-}
-
-func register(c *gin.Context) {
-	var input struct {
-		Name     string `json:"name" binding:"required"`
-		Email    string `json:"email" binding:"required,email"`
-		Password string `json:"password" binding:"required,min=6"`
-	}
-
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
-		return
-	}
-
-	user := User{
-		Name:     input.Name,
-		Email:    input.Email,
-		Password: string(hashedPassword),
-	}
-
-	if err := db.Create(&user).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Email already exists"})
-		return
-	}
-
-	token, err := generateToken(user)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
-		return
-	}
-
-	c.JSON(http.StatusCreated, gin.H{
-		"token": token,
-		"user": gin.H{
-			"id":    user.ID,
-			"name":  user.Name,
-			"email": user.Email,
+			"id":      user.ID,
+			"name":    user.Name,
+			"email":   user.Email,
+			"isAdmin": user.IsAdmin,
 		},
 	})
 }
@@ -95,6 +64,34 @@ func register(c *gin.Context) {
 func getPosts(c *gin.Context) {
 	var posts []Post
 	if err := db.Preload("Author").Find(&posts).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch posts"})
+		return
+	}
+
+	for i := range posts {
+		if posts[i].Author.ID == 0 {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Author relationship not properly set up"})
+			return
+		}
+	}
+	page := c.DefaultQuery("page", "1")
+	pageSize := c.DefaultQuery("pageSize", "10")
+
+	pageInt, err := strconv.Atoi(page)
+	if err != nil || pageInt < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid page number"})
+		return
+	}
+
+	pageSizeInt, err := strconv.Atoi(pageSize)
+	if err != nil || pageSizeInt < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid page size"})
+	c.JSON(http.StatusOK, gin.H{"posts": posts})
+	}
+
+	offset := (pageInt - 1) * pageSizeInt
+
+	if err := db.Preload("Author").Limit(pageSizeInt).Offset(offset).Find(&posts).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch posts"})
 		return
 	}
@@ -144,6 +141,10 @@ func createPost(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, post)
+}
+
+func generateSlug(s string) string {
+	return generateTitleSlug(s)
 }
 
 func updatePost(c *gin.Context) {

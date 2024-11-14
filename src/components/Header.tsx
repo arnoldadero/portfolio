@@ -48,10 +48,7 @@ export default function Header() {
                 <button onClick={logout} className="nav-link">Logout</button>
               </>
             ) : (
-              <>
-                <Link to="/login" className="nav-link">Login</Link>
-                <Link to="/register" className="nav-link">Register</Link>
-              </>
+              <Link to="/login" className="nav-link">Login</Link>
             )}
 
             <div className="flex items-center gap-4 ml-6">
@@ -96,10 +93,7 @@ export default function Header() {
                 <button onClick={logout} className="nav-link">Logout</button>
               </>
             ) : (
-              <>
-                <Link to="/login" className="nav-link">Login</Link>
-                <Link to="/register" className="nav-link">Register</Link>
-              </>
+              <Link to="/login" className="nav-link">Login</Link>
             )}
           </nav>
         </div>

@@ -21,6 +21,9 @@ func main() {
 		log.Println("No .env file found")
 	}
 
+	// Add debug logging
+	log.Printf("Attempting to connect to database: %s", os.Getenv("DATABASE_URL"))
+
 	initDB()
 	router := setupRouter()
 
@@ -29,7 +32,7 @@ func main() {
 		port = "8080"
 	}
 
-	log.Printf("Server running on port %s", port)
+	log.Printf("Server starting on http://localhost:%s", port)
 	if err := router.Run(":" + port); err != nil {
 		log.Fatal("Server failed to start:", err)
 	}
@@ -68,8 +71,9 @@ func initDB() {
 
 func createAdminUser() {
 	var user User
-	if err := db.Where("email = ?", "aadero@admin.com").First(&user).Error; err != nil {
-		// User doesn't exist, create it
+	if err := db.Debug().Where("email = ?", "aadero@admin.com").First(&user).Error; err != nil {
+		log.Printf("Creating admin user because: %v", err)
+		
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte("09Octobe"), bcrypt.DefaultCost)
 		if err != nil {
 			log.Fatal("Failed to hash password:", err)
@@ -79,35 +83,40 @@ func createAdminUser() {
 			Name:     "aadero",
 			Email:    "aadero@admin.com",
 			Password: string(hashedPassword),
+			IsAdmin:  true,
 		}
 
 		if err := db.Create(&adminUser).Error; err != nil {
 			log.Fatal("Failed to create admin user:", err)
 		}
 		log.Println("Admin user created successfully")
+	} else {
+		log.Println("Admin user already exists")
 	}
 }
 
 func setupRouter() *gin.Engine {
 	router := gin.Default()
-
-	// CORS configuration
-	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"http://localhost:5173"}
-	config.AllowCredentials = true
-	config.AddAllowHeaders("Authorization")
+	
+	config := cors.Config{
+		// Update to allow requests from all origins during development
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization", "X-Requested-With"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}
 	router.Use(cors.New(config))
 
 	// Public routes
 	public := router.Group("/api")
 	{
 		public.POST("/auth/login", login)
-		public.POST("/auth/register", register)
 		public.GET("/posts", getPosts)
 		public.GET("/posts/:slug", getPost)
 	}
 
-	// Protected routes
 	protected := router.Group("/api")
 	protected.Use(authMiddleware())
 	{
@@ -125,6 +134,12 @@ func setupRouter() *gin.Engine {
 
 func authMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// Skip auth for OPTIONS requests
+		if c.Request.Method == "OPTIONS" {
+			c.Next()
+			return
+		}
+
 		token := c.GetHeader("Authorization")
 		if token == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header required"})
@@ -134,6 +149,13 @@ func authMiddleware() gin.HandlerFunc {
 
 		// Remove "Bearer " prefix
 		token = token[7:]
+
+		// Handle token length check
+		if len(token) < 8 {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token format"})
+			c.Abort()
+			return
+		}
 
 		user, err := validateToken(token)
 		if err != nil {

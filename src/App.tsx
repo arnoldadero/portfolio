@@ -12,6 +12,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminBlog from './pages/admin/AdminBlog';
 import AdminProjects from './pages/admin/AdminProjects';
 import AdminSkills from './pages/admin/AdminSkills';
+import ProjectDetails from './pages/ProjectDetails';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,9 +26,9 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <BrowserRouter
-      future={{ 
+      future={{
         v7_startTransition: true,
-        v7_relativeSplatPath: true 
+        v7_relativeSplatPath: true
       }}
     >
       <QueryClientProvider client={queryClient}>
@@ -41,6 +42,8 @@ function App() {
                 <Route path="blog" element={<Blog />} />
                 <Route path="blog/:slug" element={<BlogPost />} />
                 <Route path="login" element={<Login />} />
+                {/* Add new route for project details */}
+                <Route path="projects/:id" element={<ProjectDetails />} />
               </Route>
 
               {/* Protected admin routes */}

@@ -41,13 +41,13 @@ export default function AdminSkills() {
             const formData = new FormData(e.currentTarget);
             createMutation.mutate({
               name: formData.get('name') as string,
-              description: formData.get('description') as string,
+              level: Number(formData.get('level')) || 0,
             });
             setEditing(null);
           }}>
             <div className="space-y-4">
               <input name="name" placeholder="Skill Name" className="w-full p-2 border rounded" />
-              <textarea name="description" placeholder="Description" className="w-full p-2 border rounded" />
+              <input name="level" type="number" placeholder="Skill Level (0-100)" min="0" max="100" className="w-full p-2 border rounded" />
               <div className="flex gap-2">
                 <Button type="submit">Save</Button>
                 <Button type="button" variant="outline" onClick={() => setEditing(null)}>Cancel</Button>
@@ -75,7 +75,7 @@ export default function AdminSkills() {
               }}>
                 <div className="space-y-4">
                   <input name="name" defaultValue={skill.name} className="w-full p-2 border rounded" />
-                  <textarea name="description" defaultValue={skill.description} className="w-full p-2 border rounded" />
+                  <input name="level" type="number" defaultValue={skill.level} min="0" max="100" className="w-full p-2 border rounded" />
                   <div className="flex gap-2">
                     <Button type="submit">Save</Button>
                     <Button type="button" variant="outline" onClick={() => setEditing(null)}>Cancel</Button>
@@ -86,7 +86,7 @@ export default function AdminSkills() {
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">{skill.name}</h3>
-                <p className="text-gray-600">{skill.description}</p>
+                <p className="text-gray-600">Level: {skill.level}</p>
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" onClick={() => setEditing(skill.id)}>

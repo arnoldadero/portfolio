@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { Lock, Mail } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
@@ -11,12 +11,18 @@ interface LoginForm {
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login, isLoading, error } = useAuthStore();
   const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>();
 
   const onSubmit = async (data: LoginForm) => {
-    await login(data.emailOrUsername, data.password);
-    navigate('/dashboard');
+    try {
+      await login(data.emailOrUsername, data.password);
+      // Redirect to the previous page or admin dashboard
+      navigate(location.state?.from || '/admin');
+    } catch (err) {
+      console.error('Login failed:', err);
+    }
   };
 
   return (

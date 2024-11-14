@@ -53,7 +53,7 @@ export default function AdminBlog() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Blog Posts Management</h1>
         <Button 
-          onClick={() => createMutation.mutate({ title: 'New Post', content: '', tags: [] })} 
+          onClick={() => createMutation.mutate({ title: 'New Post', content: '', excerpt: 'New post excerpt', tags: [], authorId: '1' })} 
           className="flex items-center gap-2"
         >
           <Plus className="w-4 h-4" /> Create New Post

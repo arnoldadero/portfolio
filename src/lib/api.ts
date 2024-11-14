@@ -1,10 +1,11 @@
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api',
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 5000,
 });
 
 api.interceptors.request.use((config) => {
@@ -13,7 +14,18 @@ api.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
-});
+}, null, { synchronous: true });
+
+api.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('auth_token');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
 
 export interface Post {
   id: string;
@@ -48,36 +60,36 @@ export interface Activity {
 }
 
 export const blogApi = {
-  // Auth endpoints will automatically get the /api prefix
-  login: (emailOrUsername: string, password: string) => 
+  // Auth endpoints
+  login: (emailOrUsername: string, password: string): Promise<AxiosResponse<any>> => 
     api.post('/auth/login', { emailOrUsername, password }),
   
-  register: (name: string, email: string, password: string) =>
-    api.post('/auth/register', { name, email, password }),
+  // Remove register endpoint
 
   // Skills
   getSkills: () => api.get('/skills'),
-  updateSkill: (id: string, data: any) => api.put(`/skills/${id}`, data),
-  createSkill: (data: any) => api.post('/skills', data),
+  updateSkill: (id: string, data: { name: string; level: number }) => api.put(`/skills/${id}`, data),
+  createSkill: (data: { name: string; level: number }) => api.post('/skills', data),
   deleteSkill: (id: string) => api.delete(`/skills/${id}`),
 
   // Projects
   getProjects: () => api.get('/projects'),
-  updateProject: (id: string, data: any) => api.put(`/projects/${id}`, data),
-  createProject: (data: any) => api.post('/projects', data),
+  getProject: (id: string) => api.get(`/projects/${id}`),
+  updateProject: (id: string, data: { name: string; description: string; url?: string }) => api.put(`/projects/${id}`, data),
+  createProject: (data: { name: string; description: string; url?: string }) => api.post('/projects', data),
   deleteProject: (id: string) => api.delete(`/projects/${id}`),
 
   // Posts
   getPosts: () => api.get<Post[]>('/posts'),
   getPost: (slug: string) => api.get<Post>(`/posts/${slug}`),
-  createPost: (data: Partial<Post>) => api.post('/posts', data),
-  updatePost: (slug: string, data: Partial<Post>) => 
+  createPost: (data: Pick<Post, 'title' | 'content' | 'excerpt' | 'tags'> & { authorId: string }) => api.post('/posts', data),
+  updatePost: (slug: string, data: { title?: string; content?: string; excerpt?: string; tags?: string[]; socialLinks?: { facebook?: string; linkedin?: string } }) => 
     api.put(`/posts/${slug}`, data),
   deletePost: (slug: string) => api.delete(`/posts/${slug}`),
 
   // Activities
   getActivities: () => api.get<Activity[]>('/activities'),
-  createActivity: (data: Omit<Activity, 'id' | 'createdAt'>) =>
+  createActivity: (data: { type: 'code' | 'blog' | 'learning'; description: string; links?: string[] }) =>
     api.post('/activities', data),
 
   // Social

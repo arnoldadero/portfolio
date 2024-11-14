@@ -24,14 +24,16 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ isLoading: true, error: null });
     try {
       const { data } = await blogApi.login(emailOrUsername, password);
-      if (!data.user.isAdmin) {
-        throw new Error('Unauthorized access');
-      }
       localStorage.setItem('auth_token', data.token);
       set({ user: data.user, isLoading: false });
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Login error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
       set({ 
-        error: error instanceof Error ? error.message : 'Invalid credentials', 
+        error: error.response?.data?.error || error.message || 'Server connection failed',
         isLoading: false 
       });
     }

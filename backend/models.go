@@ -12,6 +12,7 @@ type User struct {
 	Email    string `json:"email" gorm:"unique"`
 	Password string `json:"-"`
 	Posts    []Post `json:"posts" gorm:"foreignKey:AuthorID"` // Add foreignKey definition
+	IsAdmin  bool   `gorm:"default:false"`
 }
 
 type Post struct {

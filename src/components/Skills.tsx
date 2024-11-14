@@ -103,13 +103,15 @@ const skills: Skill[] = [
           { 
             name: "Dashboard UI",
             description: "Real-time monitoring dashboard with interactive charts",
-            link: "/projects/dashboard"
+            link: "/projects/dashboard-ui" // Update the link format
           }
         ]
       },
       {
         name: "TypeScript",
-        logo: "https://typescript.org/images/logo.svg",
+        logo: "https://cdn.jsdelivr.net/gh/remojansen/logo.ts@master/ts.png",
+        // or use
+        // logo: "https://www.typescriptlang.org/favicon-32x32.png",
         projects: [
           { 
             name: "Type-safe SDK",

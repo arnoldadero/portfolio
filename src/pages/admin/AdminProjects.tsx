@@ -43,10 +43,9 @@ export default function AdminProjects() {
             e.preventDefault();
             const formData = new FormData(e.currentTarget);
             createMutation.mutate({
-              title: formData.get('title') as string,
+              name: formData.get('title') as string,
               description: formData.get('description') as string,
-              github: formData.get('github') as string,
-              demo: formData.get('demo') as string,
+              url: formData.get('github') as string,
             });
             setEditing(null);
           }}>
@@ -74,13 +73,11 @@ export default function AdminProjects() {
                 updateMutation.mutate({
                   id: project.id,
                   data: {
-                    title: formData.get('title') as string,
+                    name: formData.get('title') as string,
                     description: formData.get('description') as string,
-                    github: formData.get('github') as string,
-                    demo: formData.get('demo') as string,
+                    url: formData.get('github') as string,
                   }
                 });
-                setEditing(null);
               }}>
                 <div className="space-y-4">
                   <input name="title" defaultValue={project.title} className="w-full p-2 border rounded" />
