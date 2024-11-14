@@ -71,7 +71,7 @@ Follow these instructions to get a local copy of the project up and running.
   ```bash
    git clone https://github.com/arnoldadero/portfolio.git
    cd portfolio
-```
+   ```
 
 2. **Install frontend dependencies:**
 

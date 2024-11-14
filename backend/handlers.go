@@ -12,7 +12,7 @@ import (
 func login(c *gin.Context) {
 	var input struct {
 		EmailOrUsername string `json:"emailOrUsername" binding:"required"`
-		Password       string `json:"password" binding:"required"`
+		Password        string `json:"password" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -86,7 +86,7 @@ func getPosts(c *gin.Context) {
 	pageSizeInt, err := strconv.Atoi(pageSize)
 	if err != nil || pageSizeInt < 1 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid page size"})
-	c.JSON(http.StatusOK, gin.H{"posts": posts})
+		c.JSON(http.StatusOK, gin.H{"posts": posts})
 	}
 
 	offset := (pageInt - 1) * pageSizeInt

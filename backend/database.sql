@@ -1,4 +1,3 @@
-
 -- Create user if not exists
 DO $$ 
 BEGIN
@@ -19,3 +18,6 @@ GRANT ALL PRIVILEGES ON DATABASE blog_db TO aadero;
 GRANT ALL PRIVILEGES ON SCHEMA public TO aadero;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO aadero;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO aadero;
+
+-- Update user to admin
+UPDATE users SET is_admin = true WHERE email = 'aadero@admin.com';

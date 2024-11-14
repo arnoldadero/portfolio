@@ -91,7 +91,17 @@ func createAdminUser() {
 		}
 		log.Println("Admin user created successfully")
 	} else {
-		log.Println("Admin user already exists")
+		// Ensure existing user has admin privileges
+		if !user.IsAdmin {
+			user.IsAdmin = true
+			if err := db.Save(&user).Error; err != nil {
+				log.Printf("Failed to update admin privileges: %v", err)
+				return
+			}
+			log.Println("Updated existing user with admin privileges")
+		} else {
+			log.Println("Admin user already exists")
+		}
 	}
 }
 
