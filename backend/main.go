@@ -11,6 +11,7 @@ import (
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var db *gorm.DB
@@ -59,7 +60,32 @@ func initDB() {
 		log.Fatal("Failed to migrate database:", err)
 	}
 
+	// Create admin user if it doesn't exist
+	createAdminUser()
+
 	log.Println("Successfully connected to database and migrated schemas")
+}
+
+func createAdminUser() {
+	var user User
+	if err := db.Where("email = ?", "aadero@admin.com").First(&user).Error; err != nil {
+		// User doesn't exist, create it
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte("09Octobe"), bcrypt.DefaultCost)
+		if err != nil {
+			log.Fatal("Failed to hash password:", err)
+		}
+
+		adminUser := User{
+			Name:     "aadero",
+			Email:    "aadero@admin.com",
+			Password: string(hashedPassword),
+		}
+
+		if err := db.Create(&adminUser).Error; err != nil {
+			log.Fatal("Failed to create admin user:", err)
+		}
+		log.Println("Admin user created successfully")
+	}
 }
 
 func setupRouter() *gin.Engine {

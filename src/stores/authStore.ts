@@ -7,12 +7,12 @@ interface AuthState {
     name: string;
     email: string;
     avatar?: string;
+    isAdmin: boolean;
   };
   isLoading: boolean;
   error: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (emailOrUsername: string, password: string) => Promise<void>;
   logout: () => void;
-  register: (name: string, email: string, password: string) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -20,15 +20,18 @@ export const useAuthStore = create<AuthState>((set) => ({
   isLoading: false,
   error: null,
 
-  login: async (email, password) => {
+  login: async (emailOrUsername, password) => {
     set({ isLoading: true, error: null });
     try {
-      const { data } = await blogApi.login(email, password);
+      const { data } = await blogApi.login(emailOrUsername, password);
+      if (!data.user.isAdmin) {
+        throw new Error('Unauthorized access');
+      }
       localStorage.setItem('auth_token', data.token);
       set({ user: data.user, isLoading: false });
     } catch (error) {
       set({ 
-        error: error instanceof Error ? error.message : 'Login failed', 
+        error: error instanceof Error ? error.message : 'Invalid credentials', 
         isLoading: false 
       });
     }
@@ -37,19 +40,5 @@ export const useAuthStore = create<AuthState>((set) => ({
   logout: () => {
     localStorage.removeItem('auth_token');
     set({ user: null });
-  },
-
-  register: async (name, email, password) => {
-    set({ isLoading: true, error: null });
-    try {
-      const { data } = await blogApi.register(name, email, password);
-      localStorage.setItem('auth_token', data.token);
-      set({ user: data.user, isLoading: false });
-    } catch (error) {
-      set({ 
-        error: error instanceof Error ? error.message : 'Registration failed', 
-        isLoading: false 
-      });
-    }
-  },
+  }
 }));

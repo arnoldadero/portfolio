@@ -9,8 +9,8 @@ import (
 
 func login(c *gin.Context) {
 	var input struct {
-		Email    string `json:"email" binding:"required,email"`
-		Password string `json:"password" binding:"required"`
+		 EmailOrUsername string `json:"emailOrUsername" binding:"required"`
+		 Password       string `json:"password" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -19,7 +19,8 @@ func login(c *gin.Context) {
 	}
 
 	var user User
-	if err := db.Where("email = ?", input.Email).First(&user).Error; err != nil {
+	// Try to find user by email or username
+	if err := db.Where("email = ? OR name = ?", input.EmailOrUsername, input.EmailOrUsername).First(&user).Error; err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return
 	}
@@ -41,6 +42,7 @@ func login(c *gin.Context) {
 			"id":    user.ID,
 			"name":  user.Name,
 			"email": user.Email,
+			"isAdmin": true,
 		},
 	})
 }

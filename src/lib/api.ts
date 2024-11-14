@@ -36,6 +36,7 @@ export interface User {
   name: string;
   email: string;
   avatar?: string;
+  isAdmin: boolean;
 }
 
 export interface Activity {
@@ -47,12 +48,24 @@ export interface Activity {
 }
 
 export const blogApi = {
-  // Auth
-  login: (email: string, password: string) => 
-    api.post('/auth/login', { email, password }),
+  // Auth endpoints will automatically get the /api prefix
+  login: (emailOrUsername: string, password: string) => 
+    api.post('/auth/login', { emailOrUsername, password }),
   
   register: (name: string, email: string, password: string) =>
     api.post('/auth/register', { name, email, password }),
+
+  // Skills
+  getSkills: () => api.get('/skills'),
+  updateSkill: (id: string, data: any) => api.put(`/skills/${id}`, data),
+  createSkill: (data: any) => api.post('/skills', data),
+  deleteSkill: (id: string) => api.delete(`/skills/${id}`),
+
+  // Projects
+  getProjects: () => api.get('/projects'),
+  updateProject: (id: string, data: any) => api.put(`/projects/${id}`, data),
+  createProject: (data: any) => api.post('/projects', data),
+  deleteProject: (id: string) => api.delete(`/projects/${id}`),
 
   // Posts
   getPosts: () => api.get<Post[]>('/posts'),

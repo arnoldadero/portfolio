@@ -2,10 +2,10 @@ import { ArrowRight } from 'lucide-react';
 
 export default function Hero() {
   return (
-    <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-white pt-16">
-      <div className="max-w-6xl mx-auto px-6 py-20">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          <div className="space-y-8 animate-fade-in">
+    <section className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-gradient-to-br from-indigo-50 to-white">
+      <div className="max-w-6xl mx-auto px-6 py-12 md:py-16">
+        <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+          <div className="space-y-6 md:space-y-8 animate-fade-in">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900">
               Full-Stack Engineer
               <span className="block text-indigo-600">Building the Future</span>
@@ -24,13 +24,15 @@ export default function Hero() {
               </a>
             </div>
           </div>
-          <div className="relative group">
+          <div className="relative group max-w-md mx-auto md:max-w-none">
             <img 
               src="https://i.postimg.cc/ThMvFtJt/Arnold-Profile-dev.jpg"
               alt="Developer workspace"
-              className="rounded-2xl shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]"
+              className="w-full h-[400px] md:h-[480px] object-cover rounded-2xl shadow-2xl 
+                       transition-all duration-500 group-hover:scale-[1.02]"
             />
-            <div className="absolute inset-0 rounded-2xl bg-indigo-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-indigo-600/20 to-transparent 
+                          opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           </div>
         </div>
       </div>

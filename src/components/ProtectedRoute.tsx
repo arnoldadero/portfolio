@@ -1,12 +1,13 @@
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
 
-export default function ProtectedRoute() {
+export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user } = useAuthStore();
+  const location = useLocation();
 
-  if (!user) {
-    return <Navigate to="/login" replace />;
+  if (!user?.isAdmin) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  return <Outlet />;
+  return <>{children}</>;
 }

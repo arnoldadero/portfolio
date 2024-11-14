@@ -5,7 +5,7 @@ import { useAuthStore } from '../stores/authStore';
 import { Button } from '../components/ui/Button';
 
 interface LoginForm {
-  email: string;
+  emailOrUsername: string;
   password: string;
 }
 
@@ -15,7 +15,7 @@ export default function Login() {
   const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>();
 
   const onSubmit = async (data: LoginForm) => {
-    await login(data.email, data.password);
+    await login(data.emailOrUsername, data.password);
     navigate('/dashboard');
   };
 
@@ -37,22 +37,22 @@ export default function Login() {
 
           <div className="space-y-4 rounded-md">
             <div>
-              <label htmlFor="email" className="sr-only">
-                Email address
+              <label htmlFor="emailOrUsername" className="sr-only">
+                Email or Username
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Mail className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
-                  {...register('email', { required: 'Email is required' })}
-                  type="email"
+                  {...register('emailOrUsername', { required: 'Email or Username is required' })}
+                  type="text"
                   className="block w-full rounded-lg border pl-10 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-indigo-500 focus:ring-indigo-500"
-                  placeholder="Email address"
+                  placeholder="Email or Username"
                 />
               </div>
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
+              {errors.emailOrUsername && (
+                <p className="mt-1 text-sm text-red-500">{errors.emailOrUsername.message}</p>
               )}
             </div>
 
