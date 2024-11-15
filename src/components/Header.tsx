@@ -27,7 +27,7 @@ export default function Header() {
           <Link to="/" className="flex items-center gap-2">
             <Terminal className={`w-6 h-6 transition-colors duration-300 
               ${isScrolled ? 'text-indigo-600' : 'text-gray-900'}`} />
-            <span className="font-semibold text-gray-900">Dev Blog</span>
+            <span className="font-semibold text-gray-900">Arnold Adero</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -52,13 +52,13 @@ export default function Header() {
             )}
 
             <div className="flex items-center gap-4 ml-6">
-              <a href="https://github.com" className="nav-link">
+              <a href="https://github.com/arnoldadero" className="nav-link">
                 <Github className="w-5 h-5" />
               </a>
-              <a href="https://linkedin.com" className="nav-link">
+              <a href="https://www.linkedin.com/in/arnold-adero-49607955" className="nav-link">
                 <Linkedin className="w-5 h-5" />
               </a>
-              <a href="mailto:contact@example.com" className="nav-link">
+              <a href="mailto:arnold@mvuvi.co.ke" className="nav-link">
                 <Mail className="w-5 h-5" />
               </a>
             </div>
