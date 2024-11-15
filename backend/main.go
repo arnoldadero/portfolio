@@ -9,30 +9,44 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm/logger"
 )
 
 var db *gorm.DB
 
 func main() {
+	// Load .env file first
 	if err := godotenv.Load(); err != nil {
-		log.Println("No .env file found")
+		log.Println("Warning: .env file not found")
 	}
 
-	// Add debug logging
-	log.Printf("Attempting to connect to database: %s", os.Getenv("DATABASE_URL"))
+	// Validate required environment variables
+	requiredEnvVars := []string{"DATABASE_URL", "JWT_SECRET"}
+	for _, env := range requiredEnvVars {
+		if os.Getenv(env) == "" {
+			log.Fatalf("Required environment variable %s is not set", env)
+		}
+	}
 
+	// Initialize database
 	initDB()
+	
+	// Setup router
 	router := setupRouter()
 
+	// Get port from environment variable or use default
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 
+	// Log server startup
 	log.Printf("Server starting on http://localhost:%s", port)
+	
+	// Start server with error handling
 	if err := router.Run(":" + port); err != nil {
 		log.Fatal("Server failed to start:", err)
 	}
@@ -45,21 +59,27 @@ func initDB() {
 		log.Fatal("DATABASE_URL environment variable is not set")
 	}
 
-	// Try connecting multiple times
-	for i := 0; i < 5; i++ {
-		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
-		if err == nil {
-			break
-		}
-		log.Printf("Failed to connect to database (attempt %d/5): %v", i+1, err)
-		time.Sleep(time.Second * 2)
-	}
+	// Configure GORM to be less verbose
+	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Error), // Only log errors
+	})
 	if err != nil {
-		log.Fatal("Failed to connect to database after 5 attempts:", err)
+		log.Fatal("Failed to connect to database:", err)
 	}
 
+	// Optimize connection pool
+	sqlDB, err := db.DB()
+	if err != nil {
+		log.Fatal("Failed to get database instance:", err)
+	}
+
+	// Set connection pool settings
+	sqlDB.SetMaxIdleConns(10)
+	sqlDB.SetMaxOpenConns(100)
+	sqlDB.SetConnMaxLifetime(time.Hour)
+
 	// Auto-migrate models
-	if err := db.AutoMigrate(&User{}, &Post{}, &Activity{}); err != nil {
+	if err := db.AutoMigrate(&User{}, &Post{}, &Activity{}, &Skill{}, &Project{}); err != nil {
 		log.Fatal("Failed to migrate database:", err)
 	}
 
@@ -71,9 +91,8 @@ func initDB() {
 
 func createAdminUser() {
 	var user User
-	if err := db.Debug().Where("email = ?", "aadero@admin.com").First(&user).Error; err != nil {
-		log.Printf("Creating admin user because: %v", err)
-		
+	// Remove Debug() call to reduce logging
+	if err := db.Where("email = ?", "aadero@admin.com").First(&user).Error; err != nil {
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte("09Octobe"), bcrypt.DefaultCost)
 		if err != nil {
 			log.Fatal("Failed to hash password:", err)
@@ -107,17 +126,22 @@ func createAdminUser() {
 
 func setupRouter() *gin.Engine {
 	router := gin.Default()
-	
+
+	// Update CORS configuration
 	config := cors.Config{
-		// Update to allow requests from all origins during development
-		AllowOrigins:     []string{"*"},
+		AllowOrigins:     []string{"http://localhost:5173", "http://127.0.0.1:5173"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization", "X-Requested-With"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}
 	router.Use(cors.New(config))
+
+	// Add health check endpoint
+	router.GET("/api/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	})
 
 	// Public routes
 	public := router.Group("/api")
@@ -125,11 +149,15 @@ func setupRouter() *gin.Engine {
 		public.POST("/auth/login", login)
 		public.GET("/posts", getPosts)
 		public.GET("/posts/:slug", getPost)
+		public.GET("/skills", getPublicSkills)
+		public.GET("/projects", getPublicProjects)
 	}
 
+	// Protected routes
 	protected := router.Group("/api")
 	protected.Use(authMiddleware())
 	{
+		// Remove duplicate skills routes from here since we have a dedicated skillsGroup
 		protected.POST("/posts", createPost)
 		protected.PUT("/posts/:slug", updatePost)
 		protected.DELETE("/posts/:slug", deletePost)
@@ -137,6 +165,21 @@ func setupRouter() *gin.Engine {
 		protected.POST("/posts/:id/share/linkedin", shareToLinkedIn)
 		protected.GET("/activities", getActivities)
 		protected.POST("/activities", createActivity)
+		protected.GET("/projects", getProjects)
+		protected.POST("/projects", createProject)
+		protected.PUT("/projects/:id", updateProject)
+		protected.DELETE("/projects/:id", deleteProject)
+	}
+
+	// Skills routes in dedicated group
+	skillsGroup := router.Group("/api/skills")
+	skillsGroup.Use(authMiddleware())
+	{
+		skillsGroup.GET("", getSkills)
+		skillsGroup.POST("", createSkill)
+		skillsGroup.PUT("/:id", updateSkill)
+		skillsGroup.DELETE("/:id", deleteSkill)
+		skillsGroup.PUT("/batch", batchUpdateSkills)
 	}
 
 	return router
@@ -157,8 +200,15 @@ func authMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Remove "Bearer " prefix
-		token = token[7:]
+		// Check if token starts with "Bearer " prefix
+		if len(token) > 7 && token[:7] == "Bearer " {
+			// Remove "Bearer " prefix
+		// Handle token length check
+		if len(token) < 1 {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token format"})
+			c.Abort()
+			return
+		}
 
 		// Handle token length check
 		if len(token) < 8 {
@@ -177,4 +227,85 @@ func authMiddleware() gin.HandlerFunc {
 		c.Set("user", user)
 		c.Next()
 	}
+}}
+
+// getPublicSkills handles the GET request for public skills
+func getPublicSkills(c *gin.Context) {
+	var skills []Skill
+	if err := db.Find(&skills).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve skills"})
+		return
+	}
+	c.JSON(http.StatusOK, skills)
+}
+
+// updateProject handles the PUT request to update a project
+func updateProject(c *gin.Context) {
+	id := c.Param("id")
+	var project Project
+	if err := db.First(&project, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Project not found"})
+		return
+	}
+
+	if err := c.ShouldBindJSON(&project); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := db.Save(&project).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update project"})
+		return
+	}
+
+	c.JSON(http.StatusOK, project)
+}
+
+// deleteProject handles the DELETE request to remove a project
+func deleteProject(c *gin.Context) {
+	id := c.Param("id")
+	var project Project
+	if err := db.First(&project, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Project not found"})
+		return
+	}
+
+	if err := db.Delete(&project).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete project"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Project deleted successfully"})
+}
+
+// getPublicProjects handles the GET request for public projects
+func getPublicProjects(c *gin.Context) {
+	var projects []Project
+	if err := db.Find(&projects).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve projects"})
+		return
+	}
+	c.JSON(http.StatusOK, projects)
+}
+
+// Models
+type Skill struct {
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	Name      string    `json:"name"`
+	Level     int       `json:"level"`
+	Category  string    `json:"category"`
+	Logo      string    `json:"logo"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type Project struct {
+	ID          uint      `gorm:"primaryKey" json:"id"`
+	Title       string    `json:"title"`
+	Description string    `json:"description"`
+	Tech        []string  `gorm:"type:text[]" json:"tech"`
+	Github      string    `json:"github"`
+	Demo        string    `json:"demo"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }

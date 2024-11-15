@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"math"
 	"net/http"
 	"strconv"
 
@@ -21,7 +23,11 @@ func login(c *gin.Context) {
 	}
 
 	var user User
-	if err := db.Debug().Where("email = ? OR name = ?", input.EmailOrUsername, input.EmailOrUsername).First(&user).Error; err != nil {
+	dbQuery := db
+	if gin.Mode() == gin.DebugMode {
+		dbQuery = db.Debug()
+	}
+	if err := dbQuery.Where("email = ? OR name = ?", input.EmailOrUsername, input.EmailOrUsername).First(&user).Error; err != nil {
 		log.Printf("User not found: %v", err)
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"error": "Invalid email/username or password",
@@ -50,7 +56,7 @@ func login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
+	response := gin.H{
 		"token": token,
 		"user": gin.H{
 			"id":      user.ID,
@@ -58,22 +64,13 @@ func login(c *gin.Context) {
 			"email":   user.Email,
 			"isAdmin": user.IsAdmin,
 		},
-	})
+	}
+
+	c.JSON(http.StatusOK, response)
 }
 
 func getPosts(c *gin.Context) {
 	var posts []Post
-	if err := db.Preload("Author").Find(&posts).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch posts"})
-		return
-	}
-
-	for i := range posts {
-		if posts[i].Author.ID == 0 {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Author relationship not properly set up"})
-			return
-		}
-	}
 	page := c.DefaultQuery("page", "1")
 	pageSize := c.DefaultQuery("pageSize", "10")
 
@@ -86,7 +83,7 @@ func getPosts(c *gin.Context) {
 	pageSizeInt, err := strconv.Atoi(pageSize)
 	if err != nil || pageSizeInt < 1 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid page size"})
-		c.JSON(http.StatusOK, gin.H{"posts": posts})
+		return
 	}
 
 	offset := (pageInt - 1) * pageSizeInt
@@ -94,6 +91,13 @@ func getPosts(c *gin.Context) {
 	if err := db.Preload("Author").Limit(pageSizeInt).Offset(offset).Find(&posts).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch posts"})
 		return
+	}
+
+	for i := range posts {
+		if posts[i].Author.ID == 0 {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Author relationship not properly set up"})
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, posts)
@@ -128,20 +132,22 @@ func createPost(c *gin.Context) {
 
 	post := Post{
 		Title:    input.Title,
+		Slug:     generateSlug(input.Title),
 		Content:  input.Content,
 		Excerpt:  input.Excerpt,
 		Tags:     input.Tags,
 		AuthorID: user.ID,
-		Slug:     generateSlug(input.Title),
 	}
 
 	if err := db.Create(&post).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create post"})
 		return
 	}
-
+	
 	c.JSON(http.StatusCreated, post)
 }
+
+
 
 func generateSlug(s string) string {
 	return generateTitleSlug(s)
@@ -249,4 +255,187 @@ func createActivity(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, activity)
+}
+
+// Skills handlers
+func getSkills(c *gin.Context) {
+	pageStr := c.DefaultQuery("page", "1")
+	limitStr := c.DefaultQuery("limit", "10")
+	sortBy := c.DefaultQuery("sortBy", "name")
+	sortOrder := c.DefaultQuery("sortOrder", "asc")
+
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid page number"})
+		return
+	}
+
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil || limit < 1 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid limit"})
+		return
+	}
+
+	offset := (page - 1) * limit
+	var skills []Skill
+	var total int64
+
+	baseQuery := db.Model(&Skill{})
+
+	// Apply search if query parameter exists
+	if search := c.Query("q"); search != "" {
+		baseQuery = baseQuery.Where("name ILIKE ? OR category ILIKE ?",
+			"%"+search+"%", "%"+search+"%")
+	}
+
+	// Get total count
+	if err := baseQuery.Count(&total).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Apply sorting and pagination
+	if err := baseQuery.Order(fmt.Sprintf("%s %s", sortBy, sortOrder)).
+		Offset(offset).
+		Limit(limit).
+		Find(&skills).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"data":       skills,
+		"total":      total,
+		"page":       page,
+		"limit":      limit,
+		"totalPages": int(math.Ceil(float64(total) / float64(limit))),
+	})
+}
+
+func createSkill(c *gin.Context) {
+	var skill Skill
+	if err := c.ShouldBindJSON(&skill); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if err := db.Create(&skill).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, skill)
+}
+
+func batchUpdateSkills(c *gin.Context) {
+    var input struct {
+        Updates []struct {
+            ID   uint                   `json:"id"`
+            Data map[string]interface{} `json:"data"`
+        } `json:"updates"`
+    }
+
+    if err := c.ShouldBindJSON(&input); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
+
+    // Start transaction
+    tx := db.Begin()
+
+    for _, update := range input.Updates {
+        var skill Skill
+        if err := tx.First(&skill, update.ID).Error; err != nil {
+            tx.Rollback()
+            c.JSON(http.StatusNotFound, gin.H{"error": fmt.Sprintf("Skill %d not found", update.ID)})
+            return
+        }
+
+        if err := tx.Model(&skill).Updates(update.Data).Error; err != nil {
+            tx.Rollback()
+            c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+            return
+        }
+    }
+
+    if err := tx.Commit().Error; err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"message": "Skills updated successfully"})
+}
+
+// Projects handlers
+func getProjects(c *gin.Context) {
+	var projects []Project
+	if err := db.Find(&projects).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, projects)
+}
+
+func createProject(c *gin.Context) {
+	var project Project
+	if err := c.ShouldBindJSON(&project); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	if err := db.Create(&project).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, project)
+}
+
+func updateSkill(c *gin.Context) {
+	id := c.Param("id")
+	var skill Skill
+
+	if err := db.First(&skill, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Skill not found"})
+		return
+	}
+
+	var input struct {
+		Name     string `json:"name"`
+		Level    int    `json:"level"`
+		Category string `json:"category"`
+		Logo     string `json:"logo"`
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	skill.Name = input.Name
+	skill.Level = input.Level
+	skill.Category = input.Category
+	if input.Logo != "" {
+		skill.Logo = input.Logo
+	}
+
+	if err := db.Save(&skill).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update skill"})
+		return
+	}
+
+	c.JSON(http.StatusOK, skill)
+}
+
+func deleteSkill(c *gin.Context) {
+	id := c.Param("id")
+
+	result := db.Delete(&Skill{}, id)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete skill"})
+		return
+	}
+
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Skill not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Skill deleted successfully"})
 }

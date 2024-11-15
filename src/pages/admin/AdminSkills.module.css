@@ -1,0 +1,7 @@
+
+.textRed {
+  color: rgb(220, 38, 38);
+}
+.textRed:hover {
+  color: rgb(185, 28, 28);
+}

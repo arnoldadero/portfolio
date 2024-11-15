@@ -59,20 +59,44 @@ export interface Activity {
   links?: string[];
 }
 
+export interface Skill {
+  id: string;
+  name: string;
+  level: number;
+  category: string;
+  logo: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export const blogApi = {
   // Auth endpoints
   login: (emailOrUsername: string, password: string): Promise<AxiosResponse<any>> => 
     api.post('/auth/login', { emailOrUsername, password }),
   
-  // Remove register endpoint
-
-  // Skills
-  getSkills: () => api.get('/skills'),
-  updateSkill: (id: string, data: { name: string; level: number }) => api.put(`/skills/${id}`, data),
+  // Skills endpoints
+  getSkills: (params?: { 
+    page?: number;
+    limit?: number;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+    search?: string;
+  }) => {
+    const query = new URLSearchParams();
+    if (params?.page) query.append('page', params.page.toString());
+    if (params?.limit) query.append('limit', params.limit.toString());
+    if (params?.sortBy) query.append('sortBy', params.sortBy);
+    if (params?.sortOrder) query.append('sortOrder', params.sortOrder);
+    if (params?.search) query.append('q', params.search);
+    return api.get<{ data: Skill[]; total: number; page: number; limit: number; totalPages: number }>(
+      `/skills?${query}`
+    );
+  },
   createSkill: (data: { name: string; level: number }) => api.post('/skills', data),
+  updateSkill: (id: string, data: { name: string; level: number }) => api.put(`/skills/${id}`, data),
   deleteSkill: (id: string) => api.delete(`/skills/${id}`),
 
-  // Projects
+  // Projects endpoints
   getProjects: () => api.get('/projects'),
   getProject: (id: string) => api.get(`/projects/${id}`),
   updateProject: (id: string, data: { name: string; description: string; url?: string }) => api.put(`/projects/${id}`, data),
@@ -97,4 +121,18 @@ export const blogApi = {
     api.post(`/posts/${postId}/share/facebook`),
   shareToLinkedIn: (postId: string) =>
     api.post(`/posts/${postId}/share/linkedin`),
+
+  // Batch operations
+  batchUpdateSkills: (updates: { id: string; data: { name: string; level: number } }[]) => 
+    api.post('/skills/batch', { updates }),
+  
+  batchDeleteSkills: (ids: string[]) => 
+    api.post('/skills/batch-delete', { ids }),
+  
+  // Search endpoints
+  searchSkills: (query: string) => 
+    api.get(`/skills/search?q=${encodeURIComponent(query)}`),
+  
+  searchProjects: (query: string) => 
+    api.get(`/projects/search?q=${encodeURIComponent(query)}`),
 };
