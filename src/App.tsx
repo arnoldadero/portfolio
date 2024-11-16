@@ -7,6 +7,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './containers/Dashboard';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 const Blog = lazy(() => import('./containers/Blog'));
 const BlogPost = lazy(() => import('./containers/BlogPost'));
@@ -37,23 +38,25 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Suspense fallback={<div>Loading...</div>}>
-        <div className="min-h-screen bg-gray-50">
-          <Header />
-          <main className="pt-16">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/blog" element={<Blog />} />
-              <Route path="/blog/:slug" element={<BlogPost />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route element={<ProtectedRoute />}>
-                <Route path="/dashboard" element={<Dashboard />} />
-              </Route>
-            </Routes>
-          </main>
-        </div>
-      </Suspense>
+      <ErrorBoundary>
+        <Suspense fallback={<div>Loading...</div>}>
+          <div className="min-h-screen bg-gray-50">
+            <Header />
+            <main className="pt-16">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/blog/:slug" element={<BlogPost />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route element={<ProtectedRoute />}>
+                  <Route path="/dashboard" element={<Dashboard />} />
+                </Route>
+              </Routes>
+            </main>
+          </div>
+        </Suspense>
+      </ErrorBoundary>
     </QueryClientProvider>
   );
 }

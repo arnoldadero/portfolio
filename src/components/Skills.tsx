@@ -1,36 +1,67 @@
 import React from 'react';
-import { Code2, Database, Globe, Layout, Server, Shield } from 'lucide-react';
+import {
+  SiGo,
+  SiRust,
+  SiNodedotjs,
+  SiPostgresql,
+  SiRedis,
+  SiTrpc,
+  SiReact,
+  SiTypescript,
+  SiNextdotjs,
+  SiTailwindcss,
+  SiWebassembly,
+  SiDocker,
+  SiAmazon,
+  SiKubernetes,
+  SiGit
+} from '@icons-pack/react-simple-icons';
+import { Code2, Database, Layout, Server } from 'lucide-react';
 
-const skills = [
+interface SkillItem {
+  name: string;
+  icon: React.ElementType;
+}
+
+interface SkillGroup {
+  category: string;
+  icon: React.ElementType;
+  items: SkillItem[];
+}
+
+const skills: SkillGroup[] = [
   {
     category: "Backend Development",
     icon: Server,
-    items: ["Golang", "Rust", "Node.js", "PostgreSQL", "Redis", "gRPC"]
+    items: [
+      { name: "Golang", icon: SiGo },
+      { name: "Rust", icon: SiRust },
+      { name: "Node.js", icon: SiNodedotjs },
+      { name: "PostgreSQL", icon: SiPostgresql },
+      { name: "Redis", icon: SiRedis },
+      { name: "gRPC", icon: SiTrpc }
+    ]
   },
   {
     category: "Frontend Development",
     icon: Layout,
-    items: ["React", "TypeScript", "Next.js", "Tailwind CSS", "WebAssembly"]
+    items: [
+      { name: "React", icon: SiReact },
+      { name: "TypeScript", icon: SiTypescript },
+      { name: "Next.js", icon: SiNextdotjs },
+      { name: "Tailwind CSS", icon: SiTailwindcss },
+      { name: "WebAssembly", icon: SiWebassembly }
+    ]
   },
   {
-    category: "System Design",
+    category: "DevOps & Tools",
     icon: Database,
-    items: ["Microservices", "Docker", "Kubernetes", "AWS", "System Architecture"]
-  },
-  {
-    category: "API Development",
-    icon: Globe,
-    items: ["RESTful APIs", "GraphQL", "API Gateway", "OpenAPI", "Protocol Buffers"]
-  },
-  {
-    category: "Security",
-    icon: Shield,
-    items: ["OAuth 2.0", "JWT", "HTTPS", "Security Best Practices"]
-  },
-  {
-    category: "Tools & Practices",
-    icon: Code2,
-    items: ["Git", "CI/CD", "TDD", "Agile", "Performance Optimization"]
+    items: [
+      { name: "Docker", icon: SiDocker },
+      { name: "Kubernetes", icon: SiKubernetes },
+      { name: "AWS", icon: SiAmazon },
+      { name: "Git", icon: SiGit }
+    ]
   }
 ];
 
@@ -59,11 +90,13 @@ export default function Skills() {
               <div className="flex flex-wrap gap-2">
                 {skill.items.map((item) => (
                   <span 
-                    key={item} 
+                    key={item.name} 
                     className="px-3 py-1 bg-gray-50 text-gray-700 text-sm rounded-full
-                             hover:bg-indigo-50 hover:text-indigo-700 transition-colors duration-300"
+                             hover:bg-indigo-50 hover:text-indigo-700 transition-colors duration-300
+                             flex items-center gap-2"
                   >
-                    {item}
+                    <item.icon className="w-4 h-4" />
+                    {item.name}
                   </span>
                 ))}
               </div>
