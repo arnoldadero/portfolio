@@ -1,16 +1,22 @@
-import { ArrowRight } from 'lucide-react';
+/* Key Features:
+1. Main landing section with responsive design
+2. Tailwind CSS styling with custom animations
+3. Call-to-action buttons
+4. Professional introduction content
+*/
+import { ArrowRight } from "lucide-react";
 
 export default function Hero() {
   return (
-    <section className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-gradient-to-br from-indigo-50 to-white">
-      <div className="max-w-6xl mx-auto px-6 py-12 md:py-16">
-        <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-          <div className="space-y-6 md:space-y-8 animate-fade-in">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900">
+    <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-indigo-900">
+      <div className="max-w-6xl mx-auto px-6 py-20">
+        <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className="space-y-8 animate-fade-in">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white">
               Full-Stack Engineer
-              <span className="block text-indigo-600">Building the Future</span>
+              <span className="block gradient-text">Building the Future</span>
             </h1>
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-gray-300">
               Crafting robust, scalable solutions with Golang, JavaScript, and Rust. 
               Passionate about performance, security, and exceptional user experiences.
             </p>
@@ -24,15 +30,14 @@ export default function Hero() {
               </a>
             </div>
           </div>
-          <div className="relative group max-w-md mx-auto md:max-w-none">
+          <div className="relative group animate-float max-w-md mx-auto">
             <img 
-              src="https://i.postimg.cc/ThMvFtJt/Arnold-Profile-dev.jpg"
+              src="https://i.postimg.cc/Zqkq4MW8/Arnold-Profile-dev.jpg"
               alt="Developer workspace"
-              className="w-full h-[400px] md:h-[480px] object-cover rounded-2xl shadow-2xl 
-                       transition-all duration-500 group-hover:scale-[1.02]"
+              className="rounded-2xl shadow-2xl transition-transform duration-500 group-hover:scale-[1.02] w-full"
+              loading="lazy"
             />
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-indigo-600/20 to-transparent 
-                          opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="absolute -inset-4 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-2xl blur-3xl opacity-30 group-hover:opacity-40 transition-opacity duration-500 -z-10" />
           </div>
         </div>
       </div>

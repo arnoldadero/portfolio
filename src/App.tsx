@@ -1,73 +1,60 @@
+import { Suspense, lazy } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
-import Layout from './components/Layout';
-import AdminLayout from './components/AdminLayout';
+import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
-import Blog from './pages/Blog';
-import BlogPost from './pages/BlogPost';
 import Login from './pages/Login';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminBlog from './pages/admin/AdminBlog';
-import AdminProjects from './pages/admin/AdminProjects';
-import AdminSkills from './pages/admin/AdminSkills';
-import ProjectDetails from './pages/ProjectDetails';
-import { RequireAuth } from './middleware/AuthMiddleware';
-// Add this import
-import Dashboard from './pages/Dashboard';
+import Register from './pages/Register';
+import Dashboard from './containers/Dashboard';
 
+const Blog = lazy(() => import('./containers/Blog'));
+const BlogPost = lazy(() => import('./containers/BlogPost'));
+
+/* Key Components:
+1. Uses React Query for data fetching and caching
+2. Implements lazy loading for Blog and BlogPost components
+3. Sets up protected and public routes
+4. Uses Suspense for loading states
+*/
+
+// QueryClient configuration - minimizes unnecessary refetches
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 1,
-      refetchOnWindowFocus: false,
+      retry: 1,                    // Only retry failed requests once
+      refetchOnWindowFocus: false, // Prevent refetching when window regains focus
     },
   },
 });
 
+// Main application structure
+// - Wraps everything in QueryClientProvider for data management
+// - Uses Suspense for handling lazy-loaded components
+// - Implements a responsive layout with Tailwind CSS
+// - Routes are organized into public and protected sections
+
 function App() {
   return (
-    <BrowserRouter
-      future={{
-        v7_startTransition: true,
-        v7_relativeSplatPath: true
-      }}
-    >
-      <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
+      <Suspense fallback={<div>Loading...</div>}>
         <div className="min-h-screen bg-gray-50">
           <Header />
           <main className="pt-16">
             <Routes>
-              {/* Public routes */}
-              <Route path="/" element={<Layout />}>
-                <Route index element={<Home />} />
-                <Route path="blog" element={<Blog />} />
-                <Route path="blog/:slug" element={<BlogPost />} />
-                <Route path="login" element={<Login />} />
-                {/* Add the dashboard route here */}
-                <Route path="dashboard" element={<Dashboard />} />
-                <Route path="projects/:id" element={<ProjectDetails />} />
-              </Route>
-
-              {/* Protected admin routes */}
-              <Route
-                path="/admin"
-                element={
-                  <RequireAuth>
-                    <AdminLayout />
-                  </RequireAuth>
-                }
-              >
-                <Route index element={<AdminDashboard />} />
-                <Route path="blog" element={<AdminBlog />} />
-                <Route path="projects" element={<AdminProjects />} />
-                <Route path="skills" element={<AdminSkills />} />
+              <Route path="/" element={<Home />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:slug" element={<BlogPost />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route element={<ProtectedRoute />}>
+                <Route path="/dashboard" element={<Dashboard />} />
               </Route>
             </Routes>
           </main>
         </div>
-      </QueryClientProvider>
-    </BrowserRouter>
+      </Suspense>
+    </QueryClientProvider>
   );
 }
 

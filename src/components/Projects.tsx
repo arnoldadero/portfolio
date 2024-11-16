@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { ExternalLink, Github, ChevronRight } from 'lucide-react';
 
 const projects = [
@@ -57,15 +57,15 @@ export default function Projects() {
           {projects.map((project) => (
             <div 
               key={project.title}
-              className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300"
+              className="bg-white rounded-xl p-6 card-hover border border-gray-100/50"
             >
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">{project.title}</h3>
+              <h3 className="text-xl font-semibold gradient-text mb-3">{project.title}</h3>
               <p className="text-gray-600 mb-4">{project.description}</p>
               <div className="flex flex-wrap gap-2 mb-4">
                 {project.tech.map((tech) => (
                   <span 
                     key={tech}
-                    className="px-3 py-1 bg-indigo-50 text-indigo-700 text-sm rounded-full"
+                    className="px-3 py-1 bg-gradient-to-r from-indigo-50 to-purple-50 text-indigo-700 text-sm rounded-full"
                   >
                     {tech}
                   </span>

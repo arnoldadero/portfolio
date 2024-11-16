@@ -9,31 +9,31 @@ import (
 type User struct {
 	gorm.Model
 	Name     string `json:"name"`
-	Email    string `json:"email"`
+	Email    string `json:"email" gorm:"unique"`
 	Password string `json:"-"`
-	IsAdmin  bool   `json:"isAdmin"`
+	Posts    []Post
 }
 
 type Post struct {
-	ID        uint      `gorm:"primaryKey" json:"id"`
-	Title     string    `json:"title"`
-	Slug      string    `gorm:"uniqueIndex" json:"slug"`
-	Content   string    `json:"content"`
-	Excerpt   string    `json:"excerpt"`
-	Tags      []string  `gorm:"type:text[]" json:"tags"`
-	AuthorID  uint      `json:"authorId"`
-	Author    User      `gorm:"foreignKey:AuthorID" json:"author"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	gorm.Model
+	Title      string    `json:"title"`
+	Content    string    `json:"content"`
+	Excerpt    string    `json:"excerpt"`
+	Slug       string    `json:"slug" gorm:"unique"`
+	AuthorID   uint      `json:"author_id"`
+	Author     User      `json:"author"`
+	Tags       []string  `json:"tags" gorm:"type:text[]"`
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
+	SocialData string    `json:"social_data"`
 }
 
 type Activity struct {
-	ID          uint      `gorm:"primaryKey" json:"id"`
+	gorm.Model
 	Type        string    `json:"type"`
 	Description string    `json:"description"`
-	Links       []string  `gorm:"type:text[]" json:"links"`
-	UserID      uint      `json:"userId"`
-	User        User      `gorm:"foreignKey:UserID" json:"user"`
-	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt"`
+	UserID      uint      `json:"user_id"`
+	User        User      `json:"user"`
+	Links       []string  `json:"links" gorm:"type:text[]"`
+	CreatedAt   time.Time `json:"created_at"`
 }

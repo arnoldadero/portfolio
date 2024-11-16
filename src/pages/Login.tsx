@@ -1,32 +1,23 @@
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { Lock, Mail } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
 import { Button } from '../components/ui/Button';
-import { useState } from 'react';
 
 interface LoginForm {
-  email: string; // Changed from emailOrUsername to match AuthStore interface
+  email: string;
   password: string;
 }
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login } = useAuthStore();
+  const { login, isLoading, error } = useAuthStore();
   const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>();
-  const [isLoading, setIsLoading] = useState(false);
-  const [loginError, setLoginError] = useState<string | null>(null);
 
   const onSubmit = async (data: LoginForm) => {
-    try {
-      setIsLoading(true);
-      await login(data);
-      navigate('/dashboard');
-    } catch (error) {
-      setLoginError('Login failed. Please check your credentials.');
-    } finally {
-      setIsLoading(false);
-    }
+    await login(data.email, data.password);
+    navigate('/dashboard');
   };
 
   return (
@@ -39,16 +30,16 @@ export default function Login() {
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-          {loginError && (
+          {error && (
             <div className="bg-red-50 text-red-500 p-3 rounded-md text-sm">
-              {loginError}
+              {error}
             </div>
           )}
 
           <div className="space-y-4 rounded-md">
             <div>
               <label htmlFor="email" className="sr-only">
-                Email
+                Email address
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -57,9 +48,8 @@ export default function Login() {
                 <input
                   {...register('email', { required: 'Email is required' })}
                   type="email"
-                  name="email"
                   className="block w-full rounded-lg border pl-10 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-indigo-500 focus:ring-indigo-500"
-                  placeholder="Email"
+                  placeholder="Email address"
                 />
               </div>
               {errors.email && (
@@ -78,7 +68,6 @@ export default function Login() {
                 <input
                   {...register('password', { required: 'Password is required' })}
                   type="password"
-                  name="password"
                   className="block w-full rounded-lg border pl-10 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-indigo-500 focus:ring-indigo-500"
                   placeholder="Password"
                 />
@@ -91,10 +80,10 @@ export default function Login() {
 
           <Button
             type="submit"
+            isLoading={isLoading}
             className="w-full"
-            disabled={isLoading}
           >
-            {isLoading ? 'Signing in...' : 'Sign in'}
+            Sign in
           </Button>
         </form>
       </div>

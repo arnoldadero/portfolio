@@ -1,22 +1,31 @@
 package main
 
 import (
-	"github.com/golang-jwt/jwt"
-	"github.com/gosimple/slug"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/golang-jwt/jwt"
+	"github.com/gosimple/slug"
 )
 
-func generateTitleSlug(title string) string {
-	return slug.Make(title)
+/* Key Utilities:
+1. String manipulation helpers
+2. URL-friendly slug generation
+3. Token validation and generation
+*/
+
+func generateToken(user User) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"user_id": user.ID,
+		"exp":     time.Now().Add(time.Hour * 24 * 7).Unix(),
+	})
+
+	return token.SignedString([]byte(os.Getenv("JWT_SECRET")))
 }
 
-func validateToken(tokenStr string) (User, error) {
-	// Remove "Bearer " prefix if present
-	tokenStr = strings.TrimPrefix(tokenStr, "Bearer ")
-	
-	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+func validateToken(tokenString string) (User, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return []byte(os.Getenv("JWT_SECRET")), nil
 	})
 
@@ -35,16 +44,8 @@ func validateToken(tokenStr string) (User, error) {
 	return User{}, jwt.ErrSignatureInvalid
 }
 
-func generateToken(user User) (string, error) {
-	token := jwt.New(jwt.SigningMethodHS256)
-	claims := token.Claims.(jwt.MapClaims)
-	claims["user_id"] = user.ID
-	claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
-
-	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
-	if err != nil {
-		return "", err
-	}
-
-	return tokenString, nil
+// generateSlug creates a URL-friendly version of a string
+// Converts spaces to hyphens and removes special characters
+func generateSlug(title string) string {
+	return slug.Make(strings.ToLower(title))
 }
