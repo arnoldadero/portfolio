@@ -1,47 +1,31 @@
-import React from 'react';
-import { Loader2 } from 'lucide-react';
+import * as React from "react";
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
-  size?: 'sm' | 'md' | 'lg';
-  isLoading?: boolean;
-  children: React.ReactNode;
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'default' | 'secondary' | 'outline';
+  size?: 'default' | 'sm' | 'lg';
 }
 
-const variants = {
-  primary: 'bg-indigo-600 text-white hover:bg-indigo-700',
-  secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200',
-  outline: 'border border-gray-300 text-gray-700 hover:bg-gray-50',
-  ghost: 'text-gray-700 hover:bg-gray-100',
-};
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant = 'default', size = 'default', ...props }, ref) => {
+    return (
+      <button
+        className={`inline-flex items-center justify-center rounded-md font-medium transition-colors
+          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+          disabled:opacity-50 disabled:pointer-events-none
+          ${variant === 'default' ? 'bg-primary text-primary-foreground hover:bg-primary/90' : ''}
+          ${variant === 'secondary' ? 'bg-secondary text-secondary-foreground hover:bg-secondary/80' : ''}
+          ${variant === 'outline' ? 'border border-input hover:bg-accent hover:text-accent-foreground' : ''}
+          ${size === 'default' ? 'h-10 py-2 px-4' : ''}
+          ${size === 'sm' ? 'h-9 px-3' : ''}
+          ${size === 'lg' ? 'h-11 px-8' : ''}
+          ${className}`}
+        ref={ref}
+        {...props}
+      />
+    );
+  }
+);
 
-const sizes = {
-  sm: 'px-3 py-1.5 text-sm',
-  md: 'px-4 py-2',
-  lg: 'px-6 py-3 text-lg',
-};
+Button.displayName = "Button";
 
-export function Button({
-  variant = 'primary',
-  size = 'md',
-  isLoading = false,
-  className = '',
-  children,
-  disabled,
-  ...props
-}: ButtonProps) {
-  return (
-    <button
-      className={`
-        inline-flex items-center justify-center rounded-lg font-medium
-        transition-colors duration-200 disabled:opacity-50
-        disabled:cursor-not-allowed ${variants[variant]} ${sizes[size]} ${className}
-      `}
-      disabled={disabled || isLoading}
-      {...props}
-    >
-      {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-      {children}
-    </button>
-  );
-}
+export { Button };

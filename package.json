@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"cd backend && go run .\" \"vite --host\"",
+    "dev": "concurrently \"cd backend && go run .\" \"vite\"",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -12,6 +12,7 @@
   "dependencies": {
     "@tanstack/react-query": "^5.24.1",
     "axios": "^1.6.7",
+    "axios-retry": "^4.5.0",
     "date-fns": "^3.3.1",
     "lucide-react": "^0.344.0",
     "react": "^18.3.1",

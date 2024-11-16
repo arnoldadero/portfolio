@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"time"
@@ -31,10 +33,13 @@ func main() {
 		}
 	}
 
+	// Set Gin to debug mode
+	gin.SetMode(gin.DebugMode)
+
 	// Initialize database
 	initDB()
 	
-	// Setup router
+	// Setup router with specific address
 	router := setupRouter()
 
 	// Get port from environment variable or use default
@@ -43,12 +48,20 @@ func main() {
 		port = "8080"
 	}
 
-	// Log server startup
-	log.Printf("Server starting on http://localhost:%s", port)
+	// Add explicit network check
+	address := fmt.Sprintf("0.0.0.0:%s", port)
+	log.Printf("Server attempting to start on %s", address)
 	
-	// Start server with error handling
-	if err := router.Run(":" + port); err != nil {
-		log.Fatal("Server failed to start:", err)
+	listener, err := net.Listen("tcp", address)
+	if err != nil {
+		log.Fatalf("Failed to create listener: %v", err)
+	}
+	defer listener.Close()
+	
+	log.Printf("Successfully bound to %s", address)
+	
+	if err := router.RunListener(listener); err != nil {
+		log.Fatalf("Server failed to start: %v", err)
 	}
 }
 
@@ -129,14 +142,16 @@ func setupRouter() *gin.Engine {
 
 	// Update CORS configuration
 	config := cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173", "http://127.0.0.1:5173"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
-		ExposeHeaders:    []string{"Content-Length"},
+		AllowOrigins:     []string{"http://127.0.0.1:5173", "http://localhost:5173"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}
 	router.Use(cors.New(config))
+
+	// Disable trusted proxies for now to rule out proxy issues
+	router.SetTrustedProxies(nil)
 
 	// Add health check endpoint
 	router.GET("/api/health", func(c *gin.Context) {
@@ -147,24 +162,29 @@ func setupRouter() *gin.Engine {
 	public := router.Group("/api")
 	{
 		public.POST("/auth/login", login)
-		public.GET("/posts", getPosts)
-		public.GET("/posts/:slug", getPost)
-		public.GET("/skills", getPublicSkills)
-		public.GET("/projects", getPublicProjects)
+		public.GET("/posts/public", getPosts)             // Changed path
+		public.GET("/posts/public/:slug", getPost)        // Changed path
+		public.GET("/skills/public", getPublicSkills)     // Already fixed
+		public.GET("/projects/public", getPublicProjects) // Already fixed
 	}
 
-	// Protected routes
+	// Protected routes grouped by resource
 	protected := router.Group("/api")
 	protected.Use(authMiddleware())
 	{
-		// Remove duplicate skills routes from here since we have a dedicated skillsGroup
+		// Posts routes
+		protected.GET("/posts", getPosts)
 		protected.POST("/posts", createPost)
 		protected.PUT("/posts/:slug", updatePost)
 		protected.DELETE("/posts/:slug", deletePost)
 		protected.POST("/posts/:id/share/facebook", shareToFacebook)
 		protected.POST("/posts/:id/share/linkedin", shareToLinkedIn)
+
+		// Activities routes
 		protected.GET("/activities", getActivities)
 		protected.POST("/activities", createActivity)
+
+		// Projects routes
 		protected.GET("/projects", getProjects)
 		protected.POST("/projects", createProject)
 		protected.PUT("/projects/:id", updateProject)

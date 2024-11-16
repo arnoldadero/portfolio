@@ -2,7 +2,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Layout from './components/Layout';
-import ProtectedRoute from './components/ProtectedRoute';
 import AdminLayout from './components/AdminLayout';
 import Home from './pages/Home';
 import Blog from './pages/Blog';
@@ -13,6 +12,9 @@ import AdminBlog from './pages/admin/AdminBlog';
 import AdminProjects from './pages/admin/AdminProjects';
 import AdminSkills from './pages/admin/AdminSkills';
 import ProjectDetails from './pages/ProjectDetails';
+import { RequireAuth } from './middleware/AuthMiddleware';
+// Add this import
+import Dashboard from './pages/Dashboard';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -42,7 +44,8 @@ function App() {
                 <Route path="blog" element={<Blog />} />
                 <Route path="blog/:slug" element={<BlogPost />} />
                 <Route path="login" element={<Login />} />
-                {/* Add new route for project details */}
+                {/* Add the dashboard route here */}
+                <Route path="dashboard" element={<Dashboard />} />
                 <Route path="projects/:id" element={<ProjectDetails />} />
               </Route>
 
@@ -50,9 +53,9 @@ function App() {
               <Route
                 path="/admin"
                 element={
-                  <ProtectedRoute>
+                  <RequireAuth>
                     <AdminLayout />
-                  </ProtectedRoute>
+                  </RequireAuth>
                 }
               >
                 <Route index element={<AdminDashboard />} />

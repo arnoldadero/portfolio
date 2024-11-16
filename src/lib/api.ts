@@ -1,24 +1,31 @@
 import axios, { AxiosResponse } from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  timeout: 5000,
+  baseURL: '/api',
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('auth_token');
+  const token = localStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
-}, null, { synchronous: true });
+});
 
 api.interceptors.response.use(
   response => response,
   error => {
+    console.error('API Error:', {
+      message: error.message,
+      code: error.code,
+      response: error.response,
+      config: error.config
+    });
+    
+    if (error.code === 'ECONNREFUSED') {
+      console.error('Connection refused. Is the backend server running?');
+    }
+    
     if (error.response?.status === 401) {
       localStorage.removeItem('auth_token');
       window.location.href = '/login';

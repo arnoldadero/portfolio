@@ -1,27 +1,31 @@
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { Lock, Mail } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
 import { Button } from '../components/ui/Button';
+import { useState } from 'react';
 
 interface LoginForm {
-  emailOrUsername: string;
+  email: string; // Changed from emailOrUsername to match AuthStore interface
   password: string;
 }
 
 export default function Login() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { login, isLoading, error } = useAuthStore();
+  const { login } = useAuthStore();
   const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>();
+  const [isLoading, setIsLoading] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   const onSubmit = async (data: LoginForm) => {
     try {
-      await login(data.emailOrUsername, data.password);
-      // Redirect to the previous page or admin dashboard
-      navigate(location.state?.from || '/admin');
-    } catch (err) {
-      console.error('Login failed:', err);
+      setIsLoading(true);
+      await login(data);
+      navigate('/dashboard');
+    } catch (error) {
+      setLoginError('Login failed. Please check your credentials.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -35,30 +39,31 @@ export default function Login() {
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-          {error && (
+          {loginError && (
             <div className="bg-red-50 text-red-500 p-3 rounded-md text-sm">
-              {error}
+              {loginError}
             </div>
           )}
 
           <div className="space-y-4 rounded-md">
             <div>
-              <label htmlFor="emailOrUsername" className="sr-only">
-                Email or Username
+              <label htmlFor="email" className="sr-only">
+                Email
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Mail className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
-                  {...register('emailOrUsername', { required: 'Email or Username is required' })}
-                  type="text"
+                  {...register('email', { required: 'Email is required' })}
+                  type="email"
+                  name="email"
                   className="block w-full rounded-lg border pl-10 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-indigo-500 focus:ring-indigo-500"
-                  placeholder="Email or Username"
+                  placeholder="Email"
                 />
               </div>
-              {errors.emailOrUsername && (
-                <p className="mt-1 text-sm text-red-500">{errors.emailOrUsername.message}</p>
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
               )}
             </div>
 
@@ -73,6 +78,7 @@ export default function Login() {
                 <input
                   {...register('password', { required: 'Password is required' })}
                   type="password"
+                  name="password"
                   className="block w-full rounded-lg border pl-10 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-indigo-500 focus:ring-indigo-500"
                   placeholder="Password"
                 />
@@ -85,10 +91,10 @@ export default function Login() {
 
           <Button
             type="submit"
-            isLoading={isLoading}
             className="w-full"
+            disabled={isLoading}
           >
-            Sign in
+            {isLoading ? 'Signing in...' : 'Sign in'}
           </Button>
         </form>
       </div>
