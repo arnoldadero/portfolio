@@ -16,12 +16,17 @@ module.exports = {
         float: {
           '0%, 100%': { transform: 'translateY(0px)' },
           '50%': { transform: 'translateY(-10px)' }
+        },
+        bounce: {
+          '0%, 100%': { transform: 'translateY(-5%)' },
+          '50%': { transform: 'translateY(0)' }
         }
       },
       animation: {
         'fade-in': 'fade-in 0.5s ease-out forwards',
         'fade-in-up': 'fade-in-up 0.5s ease-out forwards',
         float: 'float 3s ease-in-out infinite',
+        'bounce-slow': 'bounce 2s infinite'
       },
       colors: {
         primary: {

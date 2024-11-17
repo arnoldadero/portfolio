@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Mail, MessageSquare, Send, Loader2, Phone } from 'lucide-react';
+import { FaWhatsapp } from 'react-icons/fa'; // Import WhatsApp icon from react-icons
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -123,13 +124,23 @@ export default function Contact() {
       </section>
       
       <a 
-        href="https://wa.me/+254728434471"
+        href="https://wa.me/+254728434471?text=Hello%20Mvuvi"
         target="_blank"
         rel="noopener noreferrer"
-        className="fixed bottom-6 right-6 p-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-        aria-label="Chat on WhatsApp"
+        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 p-3 pr-4 
+          bg-[#25D366] hover:bg-[#20BA5C] text-white rounded-full 
+          shadow-lg hover:shadow-2xl 
+          transition-all duration-300 ease-in-out
+          hover:-translate-y-1 hover:scale-105
+          group focus:outline-none focus:ring-2 focus:ring-[#25D366] focus:ring-offset-2"
+        aria-label="Chat with Mvuvi on WhatsApp"
       >
-        <Phone className="w-6 h-6" />
+        <FaWhatsapp className="w-6 h-6 animate-bounce-slow" />
+        <span className="max-w-0 overflow-hidden opacity-0 
+          group-hover:max-w-xs group-hover:opacity-100
+          transition-all duration-300 ease-in-out whitespace-nowrap">
+          Message Mvuvi
+        </span>
       </a>
     </>
   );

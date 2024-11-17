@@ -13,27 +13,34 @@ interface BlogPost {
 }
 
 export default function Blog() {
-  const { data: posts, isLoading } = useQuery({
+  const { data: posts, isLoading, error } = useQuery({
     queryKey: ['posts'],
-    queryFn: () => blogApi.getPosts(),
+    queryFn: async () => {
+      try {
+        const response = await blogApi.getPosts();
+        console.log('Raw API Response:', response);
+        // Check if response has the expected structure
+        if (!response?.data) {
+          throw new Error('Invalid response structure');
+        }
+        return response;
+      } catch (err) {
+        console.error('API Error:', err);
+        throw err;
+      }
+    },
     staleTime: 60000, // Cache data for 60 seconds
   });
 
-  const [localPosts, setLocalPosts] = useState<BlogPost[]>([]);
-
   useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const response = await fetch('/api/posts'); // Replace with your API endpoint
-        const data = await response.json();
-        setLocalPosts(data);
-      } catch (error) {
-        console.error('Error fetching posts:', error);
-      }
-    };
+    console.log('Query State:', {
+      isLoading,
+      error,
+      posts,
+    });
+  }, [isLoading, error, posts]);
 
-    fetchPosts();
-  }, []);
+  const [localPosts, setLocalPosts] = useState<BlogPost[]>([]);
 
   // Handle pagination
   if (isLoading) {
@@ -42,6 +49,12 @@ export default function Blog() {
         <LoadingSkeleton />
       </div>
     );
+  }
+
+  // Add error handling in the component
+  if (error) {
+    console.error('Query error:', error);
+    return <div>Error loading blog posts</div>;
   }
 
   return (

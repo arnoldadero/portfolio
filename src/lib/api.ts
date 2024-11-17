@@ -56,10 +56,13 @@ export const blogApi = {
     api.post('/auth/register', { name, email, password }),
 
   // Posts
-  getPosts: (page = 1, limit = 10) =>
-    api.get<Post[]>('/posts', {
-      params: { page, limit },
-    }),
+  getPosts: async () => {
+    const response = await fetch('/api/posts'); // Confirm this URL matches your Go backend
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+  },
   getPost: (slug: string) => api.get<Post>(`/posts/${slug}`),
   createPost: (data: Partial<Post>) => api.post('/posts', data),
   updatePost: (slug: string, data: Partial<Post>) => 
