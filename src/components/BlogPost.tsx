@@ -1,4 +1,5 @@
 // src/components/BlogPost.tsx
+import React from 'react';
 import { Post } from '../types/blog';
 
 interface BlogPostProps {

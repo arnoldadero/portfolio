@@ -1,12 +1,18 @@
-import { useInfiniteQuery, InfiniteData } from '@tanstack/react-query';
-import { blogApi } from '../api/blogApi';
-import { PostsResponse } from '../types/blog';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import { Post } from '../types/blog';
+
+interface PostsResponse {
+  data: Post[];
+  nextPage: number | null;
+}
 
 export const useInfinitePosts = () => {
-    return useInfiniteQuery<PostsResponse, Error, InfiniteData<PostsResponse>, string[], number>({
-        queryKey: ['posts'],
-        queryFn: ({ pageParam = 1 }) => blogApi.getPosts(pageParam),
-        getNextPageParam: (lastPage) => lastPage.nextCursor ? Number(lastPage.nextCursor) : undefined,
-        initialPageParam: 1
-    });
+  return useInfiniteQuery<PostsResponse>({
+    queryKey: ['posts'],
+    queryFn: async ({ pageParam = 1 }) => {
+      const response = await fetch(`/api/posts?page=${pageParam}`);
+      return response.json();
+    },
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+  });
 };

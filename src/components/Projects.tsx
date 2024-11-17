@@ -1,6 +1,6 @@
+import React, { useState } from 'react';
 import { format } from 'date-fns';
-import { ExternalLink, Github, Star, Code, RefreshCw } from 'lucide-react';
-import { useState } from 'react';
+import { Star, Code, RefreshCw } from 'lucide-react';
 import { useGitHubProjects } from '../hooks/useGitHubProjects';
 
 interface GitHubProject {
@@ -21,11 +21,11 @@ interface ProjectCardProps {
   project: GitHubProject;
 }
 
-function formatDate(dateString: string) {
+const formatDate = (dateString: string): string => {
   return format(new Date(dateString), 'MMM d, yyyy');
-}
+};
 
-function ProjectCard({ project }: ProjectCardProps) {
+const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
   return (
     <div className="group relative overflow-hidden rounded-xl bg-white shadow-lg hover:shadow-xl transition-all duration-300">
       {/* Project Thumbnail */}
@@ -105,9 +105,9 @@ function ProjectCard({ project }: ProjectCardProps) {
       </div>
     </div>
   );
-}
+};
 
-export default function Projects() {
+const Projects: React.FC = () => {
   const [retrying, setRetrying] = useState(false);
   const { 
     data: projects, 
@@ -175,4 +175,6 @@ export default function Projects() {
       </div>
     </section>
   );
-}
+};
+
+export default Projects;

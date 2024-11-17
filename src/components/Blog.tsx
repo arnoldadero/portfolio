@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { useInfinitePosts } from '../hooks/useInfinitePosts';
 import { BlogPost } from './BlogPost';
@@ -13,7 +13,13 @@ export const Blog = () => {
         hasNextPage, 
         isLoading, 
         isFetchingNextPage 
-    } = useInfinitePosts();
+    } = useInfinitePosts() as {
+        data?: { pages: Post[][] };
+        fetchNextPage: () => void;
+        hasNextPage: boolean;
+        isLoading: boolean;
+        isFetchingNextPage: boolean;
+    };
 
     useEffect(() => {
         if (inView && hasNextPage) {
@@ -29,7 +35,7 @@ export const Blog = () => {
                 <>
                     {data?.pages.map((page, pageIndex) => (
                         <div key={pageIndex} className="space-y-8">
-                            {page.data.map((post: Post) => (
+                            {page.map((post: Post) => (
                                 <BlogPost key={post.id} post={post} />
                             ))}
                         </div>
