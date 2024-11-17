@@ -23,10 +23,10 @@ export default function Contact() {
   return (
     <>
       <section id="contact" className="py-20 min-h-screen bg-gradient-to-b from-white via-indigo-50/30 to-white relative overflow-hidden">
-        {/* Decorative elements */}
+        {/* Enhanced decorative elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-indigo-100/50 blur-3xl" />
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full bg-purple-100/50 blur-3xl" />
+          <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-indigo-100/50 blur-3xl animate-pulse" />
+          <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-purple-100/50 blur-3xl animate-pulse animation-delay-1000" />
         </div>
 
         <div className="max-w-6xl mx-auto px-6 relative">
@@ -41,7 +41,7 @@ export default function Contact() {
               </p>
             </div>
             
-            <form onSubmit={handleSubmit} className="backdrop-blur-sm bg-white/80 p-8 rounded-2xl shadow-lg space-y-6">
+            <form onSubmit={handleSubmit} className="backdrop-blur-md bg-white/90 p-8 rounded-2xl shadow-lg space-y-6 border border-white/20 hover:shadow-xl transition-shadow duration-300">
               <div className="space-y-4">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Name</label>
@@ -50,7 +50,7 @@ export default function Contact() {
                     id="name"
                     value={formData.name}
                     onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300 bg-white/50 backdrop-blur-sm"
                     required
                   />
                 </div>
@@ -62,7 +62,7 @@ export default function Contact() {
                     id="email"
                     value={formData.email}
                     onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300 bg-white/50 backdrop-blur-sm"
                     required
                   />
                 </div>
@@ -74,7 +74,7 @@ export default function Contact() {
                     value={formData.message}
                     onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
                     rows={4}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300"
+                    className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300 bg-white/50 backdrop-blur-sm"
                     required
                   />
                 </div>
@@ -123,13 +123,14 @@ export default function Contact() {
         </div>
       </section>
       
+      {/* Enhanced WhatsApp button */}
       <a 
         href="https://wa.me/+254728434471?text=Hello%20Mvuvi"
         target="_blank"
         rel="noopener noreferrer"
         className="fixed bottom-6 right-6 z-50 flex items-center gap-2 p-3 pr-4 
-          bg-[#25D366] hover:bg-[#20BA5C] text-white rounded-full 
-          shadow-lg hover:shadow-2xl 
+          bg-gradient-to-r from-[#25D366] to-[#20BA5C] text-white rounded-full 
+          shadow-lg hover:shadow-2xl shadow-[#25D366]/20
           transition-all duration-300 ease-in-out
           hover:-translate-y-1 hover:scale-105
           group focus:outline-none focus:ring-2 focus:ring-[#25D366] focus:ring-offset-2"

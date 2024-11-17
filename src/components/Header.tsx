@@ -21,13 +21,15 @@ export default function Header() {
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 
-      ${isScrolled ? 'bg-white/90 shadow-sm backdrop-blur-sm' : 'bg-transparent'}`}>
+      ${isScrolled 
+        ? 'bg-white/90 shadow-lg shadow-black/[0.03] backdrop-blur-md border-b border-black/[0.07]' 
+        : 'bg-transparent'}`}>
       <div className="max-w-6xl mx-auto px-6">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center gap-2">
             <Terminal className={`w-6 h-6 transition-colors duration-300 
               ${isScrolled ? 'text-indigo-600' : 'text-gray-900'}`} />
-            <span className="font-semibold text-gray-900">Dev Blog</span>
+            <span className="font-semibold text-gray-900">Mvuvi</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -55,30 +57,30 @@ export default function Header() {
             )}
 
             <div className="flex items-center gap-4 ml-6">
-              <a href="https://github.com" className="nav-link">
+              <a href="https://github.com/arnoldadero" className="nav-link hover:scale-110 transition-transform">
                 <Github className="w-5 h-5" />
               </a>
-              <a href="https://linkedin.com" className="nav-link">
+              <a href="https://www.linkedin.com/in/arnold-adero-49607955" className="nav-link">
                 <Linkedin className="w-5 h-5" />
               </a>
-              <a href="mailto:contact@example.com" className="nav-link">
+              <a href="mailto:arnold@mvuvi.co.ke" className="nav-link">
                 <Mail className="w-5 h-5" />
               </a>
             </div>
           </nav>
 
-          {/* Mobile Menu Button */}
+          {/* Enhanced Mobile Menu Button */}
           <button 
-            className="md:hidden p-2"
+            className="md:hidden p-2 hover:bg-gray-100/50 rounded-lg transition-colors"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
 
-        {/* Mobile Navigation */}
-        <div className={`md:hidden transition-all duration-300 overflow-hidden
-          ${isMobileMenuOpen ? 'max-h-64 opacity-100' : 'max-h-0 opacity-0'}`}>
+        {/* Enhanced Mobile Navigation */}
+        <div className={`md:hidden transition-all duration-300 overflow-hidden backdrop-blur-sm
+          ${isMobileMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
           <nav className="flex flex-col gap-4 py-4">
             {isHomePage ? (
               <>

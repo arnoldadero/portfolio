@@ -42,6 +42,25 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes fillWidth {
+  0% { 
+    transform: scaleX(0);
+  }
+  75% {
+    transform: scaleX(1);
+  }
+  100% { 
+    transform: scaleX(var(--percentage, 0));
+  }
+}
+
+@keyframes blob {
+  0% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -50px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
 /* Component-specific styles */
 .nav-link {
   position: relative;
@@ -200,7 +219,7 @@
   gap: 0.5rem;
   padding: 0.375rem 0.75rem;
   border-radius: 0.75rem;
-  background-color: rgb(249 250 251);
+  background-color: transparent;
   color: rgb(55 65 81);
   font-size: 0.875rem;
   border: 1px solid rgb(243 244 246);
@@ -231,22 +250,22 @@
   color: rgb(79 70 229);
 }
 
-.language-bar {
-  height: 0.5rem;
-  width: 100%;
-  border-radius: 9999px;
-  overflow: hidden;
-  display: flex;
-  margin-bottom: 0.5rem;
+.language-tag-fill {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.35;
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 1.5s ease-in-out;
 }
 
-.language-bar-segment {
-  height: 100%;
-  transition: all 0.3s;
+.language-tag-fill.animate-fill {
+  animation: fillWidth 3.5s ease-in-out forwards;
 }
 
-.language-bar-segment:hover {
-  filter: brightness(1.1);
+.animate-languages .language-tag-fill {
+  animation-play-state: running;
 }
 
 .topic-tag {
@@ -291,4 +310,16 @@
 
 .project-action-secondary:hover {
   background-color: rgb(238 242 255);
+}
+
+.animate-blob {
+  animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-1000 {
+  animation-delay: 1s;
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { Star, Clock, Code, ExternalLink, RefreshCw } from 'lucide-react';
 import {
@@ -22,6 +22,7 @@ import {
   SiOpenjdk
 } from '@icons-pack/react-simple-icons';
 import { useGitHubProjects } from '../hooks/useGitHubProjects';
+import { useInView } from 'react-intersection-observer';
 
 interface GitHubProject {
   id: number;
@@ -94,6 +95,43 @@ const languageColors: { [key: string]: string } = {
 };
 
 const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [hasAnimated, setHasAnimated] = useState(false);
+  
+  useEffect(() => {
+    // Initial animation
+    const timer = setTimeout(() => setIsAnimating(true), 100);
+    return () => clearTimeout(timer);
+  }, []); // Remove hasAnimated dependency
+
+  // Add effect to handle hash change
+  useEffect(() => {
+    const handleHashChange = () => {
+      if (window.location.hash === '#projects') {
+        setIsAnimating(true);
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    // Check hash on mount
+    if (window.location.hash === '#projects') {
+      setIsAnimating(true);
+    }
+
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
+
+  const handleClick = () => {
+    if (!isAnimating) {
+      setIsAnimating(true);
+    }
+  };
+
+  const handleAnimationEnd = () => {
+    setHasAnimated(true);
+    setIsAnimating(false);
+  };
+
   const processLanguages = () => {
     if (!project.languages) return [];
     
@@ -117,7 +155,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
   const languages = processLanguages();
 
   return (
-    <div className="project-card">
+    <div className="project-card" onClick={handleClick}>
       <div className="project-thumbnail">
         {project.thumbnail ? (
           <img 
@@ -148,21 +186,22 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
           </h3>
           <p className="text-gray-600 mb-4 line-clamp-2">{project.description}</p>
 
-          {/* Languages with Icons */}
+          {/* Languages with Icons - Keep only this section */}
           <div className="flex flex-wrap gap-3 mb-4">
             {languages.map(({ name, color, percentage }) => {
               const LangIcon = languageIcons[name] || Code;
+              const scale = hasAnimated && !isAnimating ? parseFloat(percentage) / 100 : undefined;
+              
               return (
                 <span key={name} className="language-tag">
                   <div
+                    className={`language-tag-fill ${isAnimating ? 'animate-fill' : ''}`}
                     style={{
-                      position: 'absolute',
-                      inset: 0,
                       backgroundColor: color,
-                      width: `${percentage}%`,
-                      zIndex: -1,
-                      opacity: 0.15,
-                    }}
+                      '--percentage': parseFloat(percentage) / 100,
+                      transform: scale ? `scaleX(${scale})` : undefined
+                    } as React.CSSProperties}
+                    onAnimationEnd={handleAnimationEnd}
                   />
                   <LangIcon className="language-icon z-10" style={{ color }} />
                   <span className="z-10">{name}</span>
@@ -172,50 +211,14 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
             })}
           </div>
 
-          {/* Enhanced Tech Stack */}
+          {/* Topics */}
           <div className="flex flex-wrap gap-2 mb-4">
             {project.topics.map((tech) => (
-              <span 
-                key={tech}
-                className="topic-tag"
-              >
-                {tech}
-              </span>
+              <span key={tech} className="topic-tag">{tech}</span>
             ))}
           </div>
 
-          {/* Language Percentages Bar */}
-          {languages.length > 0 && (
-            <div className="mb-4">
-              <div className="language-bar">
-                {languages.map(({ name, color, percentage }) => (
-                  <div
-                    key={name}
-                    className="language-bar-segment"
-                    style={{
-                      width: `${percentage}%`,
-                      backgroundColor: color,
-                    }}
-                    title={`${name}: ${percentage}%`}
-                  />
-                ))}
-              </div>
-              <div className="mt-2 flex flex-wrap gap-3">
-                {languages.map(({ name, color, percentage }) => (
-                  <span key={name} className="text-xs flex items-center gap-1">
-                    <span 
-                      className="w-2 h-2 rounded-full inline-block"
-                      style={{ backgroundColor: color }}
-                    />
-                    <span className="text-gray-600">{name}</span>
-                    <span className="text-gray-400">{percentage}%</span>
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Enhanced Project Stats */}
+          {/* Project Stats */}
           <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
             <span className="flex items-center gap-1 hover:text-yellow-500 transition-colors">
               <Star className="w-4 h-4" />
@@ -264,6 +267,10 @@ const Projects: React.FC = () => {
     error, 
     refetch 
   } = useGitHubProjects('arnoldadero');
+  const [ref, inView] = useInView({
+    triggerOnce: true,
+    threshold: 0.1,
+  });
 
   const handleRetry = async () => {
     setRetrying(true);
@@ -316,7 +323,10 @@ const Projects: React.FC = () => {
     <section id="projects" className="py-20 bg-gray-50">
       <div className="max-w-6xl mx-auto px-6">
         <h2 className="text-3xl font-bold text-gray-900 mb-12">Notable Projects</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div 
+          ref={ref}
+          className={`grid md:grid-cols-2 lg:grid-cols-3 gap-8 ${inView ? 'animate-languages' : ''}`}
+        >
           {projects?.map((project: GitHubProject) => (
             <ProjectCard key={project.id} project={project} />
           ))}
