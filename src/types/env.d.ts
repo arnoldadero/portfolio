@@ -11,9 +11,7 @@ declare global {
 }
 
 interface ImportMetaEnv {
-  readonly VITE_API_URL: string;
   readonly VITE_GITHUB_TOKEN: string;
-  // Add other env variables here
 }
 
 interface ImportMeta {

@@ -2,27 +2,104 @@
 import { useQuery } from '@tanstack/react-query';
 
 export const useGitHubProjects = (username: string) => {
-  // Use import.meta.env instead of process.env for Vite
   const token = import.meta.env.VITE_GITHUB_TOKEN;
+  const headers = {
+    ...(token && { Authorization: `Bearer ${token}` }),
+    'Content-Type': 'application/json',
+  };
 
   return useQuery({
     queryKey: ['github-projects', username],
     queryFn: async () => {
-      const response = await fetch(
-        `https://api.github.com/users/${username}/repos?sort=updated&per_page=6`,
-        {
-          headers: {
-            ...(token && { Authorization: `Bearer ${token}` }),
-            'Content-Type': 'application/json',
-          },
+      // Get user's pinned repositories first
+      const pinnedReposQuery = `
+        query {
+          user(login: "${username}") {
+            pinnedItems(first: 3, types: REPOSITORY) {  // Changed from 6 to 3
+              nodes {
+                ... on Repository {
+                  id
+                  name
+                  description
+                  url
+                  homepageUrl
+                  languages(first: 10, orderBy: {field: SIZE, direction: DESC}) {
+                    edges {
+                      node {
+                        name
+                        color
+                      }
+                      size
+                    }
+                    totalSize
+                  }
+                  repositoryTopics(first: 10) {
+                    nodes {
+                      topic {
+                        name
+                      }
+                    }
+                  }
+                  stargazerCount
+                  updatedAt
+                }
+              }
+            }
+          }
         }
-      );
+      `;
 
-      if (!response.ok) {
-        throw new Error(`GitHub API error: ${response.statusText}`);
+      try {
+        const graphqlResponse = await fetch('https://api.github.com/graphql', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ query: pinnedReposQuery }),
+        });
+
+        if (!graphqlResponse.ok) {
+          throw new Error('GraphQL query failed');
+        }
+
+        const data = await graphqlResponse.json();
+        return data.data.user.pinnedItems.nodes.map((repo: any) => ({
+          id: repo.id,
+          name: repo.name,
+          description: repo.description,
+          html_url: repo.url,
+          homepage: repo.homepageUrl,
+          languages: repo.languages.edges.map((edge: any) => ({
+            name: edge.node.name,
+            color: edge.node.color,
+            percentage: (edge.size / repo.languages.totalSize * 100).toFixed(1)
+          })),
+          topics: repo.repositoryTopics.nodes.map((topic: any) => topic.topic.name),
+          stargazers_count: repo.stargazerCount,
+          updated_at: repo.updatedAt
+        }));
+      } catch (error) {
+        // Fallback to REST API if GraphQL fails
+        const reposResponse = await fetch(
+          `https://api.github.com/users/${username}/repos?sort=updated&per_page=3`,  // Changed from 6 to 3
+          { headers }
+        );
+
+        if (!reposResponse.ok) {
+          throw new Error(`GitHub API error: ${reposResponse.statusText}`);
+        }
+
+        const repos = await reposResponse.json();
+
+        // Fetch languages for each repository
+        const reposWithLanguages = await Promise.all(
+          repos.map(async (repo: any) => {
+            const languagesResponse = await fetch(repo.languages_url, { headers });
+            const languages = await languagesResponse.json();
+            return { ...repo, languages };
+          })
+        );
+
+        return reposWithLanguages;
       }
-
-      return response.json();
     },
     retry: 2,
   });
