@@ -1,18 +1,13 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { Post } from '../types/blog';
+import type { PostsResponse } from '../types';
 
-interface PostsResponse {
-  data: Post[];
-  nextPage: number | null;
-}
-
-export const useInfinitePosts = () => {
-  return useInfiniteQuery<PostsResponse>({
+export function useInfinitePosts() {
+  return useInfiniteQuery({
     queryKey: ['posts'],
     queryFn: async ({ pageParam = 1 }) => {
       const response = await fetch(`/api/posts?page=${pageParam}`);
-      return response.json();
+      return response.json() as Promise<PostsResponse>;
     },
     getNextPageParam: (lastPage) => lastPage.nextPage,
   });
-};
+}

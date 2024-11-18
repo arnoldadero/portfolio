@@ -1,16 +1,10 @@
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Calendar, Clock, Tag, User } from 'lucide-react';
-import { blogApi, Post } from '../lib/api';
+import { blogApi } from '../lib/api';
+import type { Post } from '../types';
 import { format } from 'date-fns';
 import LoadingSkeleton from '../components/LoadingSkeleton';
-import React, { useState, useEffect } from 'react';
-
-interface BlogPost {
-  id: number;
-  title: string;
-  content: string;
-  // Add other properties as needed
-}
 
 export default function Blog() {
   const { data: posts, isLoading, error } = useQuery({
@@ -32,7 +26,7 @@ export default function Blog() {
     staleTime: 60000, // Cache data for 60 seconds
   });
 
-  useEffect(() => {
+  React.useEffect(() => {
     console.log('Query State:', {
       isLoading,
       error,
@@ -40,7 +34,7 @@ export default function Blog() {
     });
   }, [isLoading, error, posts]);
 
-  const [localPosts, setLocalPosts] = useState<BlogPost[]>([]);
+  const [localPosts, setLocalPosts] = React.useState<Post[]>([]);
 
   // Handle pagination
   if (isLoading) {

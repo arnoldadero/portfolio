@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Github, Linkedin, Mail, Terminal, Menu, X } from 'lucide-react';
-import { useAuthStore } from '../stores/authStore';
+import { useAuthStore } from '../lib/stores/authStore';
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -46,13 +46,12 @@ export default function Header() {
             
             {user ? (
               <>
-                <Link to="/dashboard" className="nav-link">Dashboard</Link>
+                <Link to="/admin" className="nav-link">Admin</Link>
                 <button onClick={logout} className="nav-link">Logout</button>
               </>
             ) : (
               <>
                 <Link to="/login" className="nav-link">Login</Link>
-                <Link to="/register" className="nav-link">Register</Link>
               </>
             )}
 
@@ -94,13 +93,12 @@ export default function Header() {
 
             {user ? (
               <>
-                <Link to="/dashboard" className="nav-link">Dashboard</Link>
+                <Link to="/admin" className="nav-link">Admin</Link>
                 <button onClick={logout} className="nav-link">Logout</button>
               </>
             ) : (
               <>
                 <Link to="/login" className="nav-link">Login</Link>
-                <Link to="/register" className="nav-link">Register</Link>
               </>
             )}
           </nav>

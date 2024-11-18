@@ -2,13 +2,18 @@ package main
 
 import (
 	"log"
-	"net/http"
 	"os"
+
+	"blog-backend/config"
+	"blog-backend/handlers"
+	"blog-backend/middleware"
+	"blog-backend/models"
+	"blog-backend/repository"
+	"blog-backend/service"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
@@ -19,8 +24,68 @@ func main() {
 		log.Println("No .env file found")
 	}
 
-	initDB()
-	router := setupRouter()
+	// Initialize database
+	var err error
+	db, err = config.InitDatabase()
+	if err != nil {
+		log.Fatal("Failed to initialize database:", err)
+	}
+
+	// Explicitly reference db to remove unused variable warning
+	_ = db
+
+	// Auto-migrate models
+	if err := db.AutoMigrate(&models.User{}, &models.Post{}, &models.Activity{}, &models.Project{}); err != nil {
+		log.Fatal("Failed to migrate database:", err)
+	}
+
+	// Initialize layers
+	repo := repository.NewRepository(db)
+	svc := service.NewService(repo)
+	handler := handlers.NewHandler(svc)
+
+	router := gin.Default()
+
+	// CORS configuration
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowOrigins = []string{"http://localhost:3000", "http://localhost:5173", "http://localhost:5174", "http://localhost:8081"}
+	corsConfig.AllowCredentials = true
+	corsConfig.AddAllowHeaders("Authorization")
+	router.Use(cors.New(corsConfig))
+
+	// Public routes
+	public := router.Group("/api")
+	{
+		public.POST("/auth/login", handler.Login)
+		public.GET("/posts", handler.GetPosts)
+		public.GET("/posts/:slug", handler.GetPost)
+		public.GET("/projects", handler.GetProjects)
+	}
+
+	// Protected routes
+	protected := router.Group("/api")
+	protected.Use(middleware.AuthMiddleware())
+	{
+		// Auth routes
+		protected.GET("/auth/verify", handler.Verify)
+
+		// Project routes
+		protected.POST("/projects", handler.CreateProject)
+		protected.PUT("/projects/:id", handler.UpdateProject)
+		protected.DELETE("/projects/:id", handler.DeleteProject)
+		protected.POST("/upload", handler.UploadImage)
+
+		// Post routes
+		protected.POST("/posts", handler.CreatePost)
+		protected.PUT("/posts/:slug", handler.UpdatePost)
+		protected.DELETE("/posts/:slug", handler.DeletePost)
+
+		// Activity routes
+		protected.GET("/activities", handler.GetActivities)
+		protected.POST("/activities", handler.CreateActivity)
+	}
+	// Serve uploaded files
+	router.Static("/uploads", "./uploads")
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -30,91 +95,5 @@ func main() {
 	log.Printf("Server running on port %s", port)
 	if err := router.Run(":" + port); err != nil {
 		log.Fatal("Server failed to start:", err)
-	}
-}
-
-// Database configuration
-// - Uses environment variables for security
-// - Implements GORM for ORM functionality
-// - PostgreSQL as the database backend
-func initDB() {
-	var err error
-	dsn := os.Getenv("DATABASE_URL")
-	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		log.Fatal("Failed to connect to database:", err)
-	}
-
-	// // Auto-migrate models
-	// if err := db.AutoMigrate(&User{}, &Post{}, &Activity{}); err != nil {
-	// 	log.Fatal("Failed to migrate database:", err)
-	// }
-}
-
-// Router setup
-// - Implements CORS for local development
-// - Separates routes into public and protected groups
-// - Uses middleware for authentication
-// - Implements RESTful endpoints for posts and activities
-func setupRouter() *gin.Engine {
-	router := gin.Default()
-
-	// CORS configuration
-	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"http://localhost:5173"}
-	config.AllowCredentials = true
-	config.AddAllowHeaders("Authorization")
-	router.Use(cors.New(config))
-
-	// Public routes
-	public := router.Group("/api")
-	{
-		public.POST("/auth/login", login)
-		public.POST("/auth/register", register)
-		public.GET("/posts", getPosts)
-		public.GET("/posts/:slug", getPost)
-	}
-
-	// Protected routes
-	protected := router.Group("/api")
-	protected.Use(authMiddleware())
-	{
-		protected.POST("/posts", createPost)
-		protected.PUT("/posts/:slug", updatePost)
-		protected.DELETE("/posts/:slug", deletePost)
-		protected.POST("/posts/:id/share/facebook", shareToFacebook)
-		protected.POST("/posts/:id/share/linkedin", shareToLinkedIn)
-		protected.GET("/activities", getActivities)
-		protected.POST("/activities", createActivity)
-	}
-
-	return router
-}
-
-// Authentication middleware
-// - Validates JWT tokens
-// - Extracts user information
-// - Protects sensitive routes
-func authMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		token := c.GetHeader("Authorization")
-		if token == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header required"})
-			c.Abort()
-			return
-		}
-
-		// Remove "Bearer " prefix
-		token = token[7:]
-
-		user, err := validateToken(token)
-		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
-			c.Abort()
-			return
-		}
-
-		c.Set("user", user)
-		c.Next()
 	}
 }

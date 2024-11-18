@@ -1,64 +1,93 @@
-import React, { Suspense, lazy } from 'react';
+import { Suspense } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Routes, Route } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
+import './styles/index.css';
+
+// Layout Components
 import Header from './components/Header';
-import ProtectedRoute from './components/ProtectedRoute';
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Dashboard from './containers/Dashboard';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { LoadingSpinner } from "./components/LoadingSpinner";
+import ProtectedRoute from './components/ProtectedRoute';
 
-const Blog = lazy(() => import('./containers/Blog'));
-const BlogPost = lazy(() => import('./containers/BlogPost'));
+// Page Components
+import AdminDashboard from './containers/AdminDashboard';
+import Login from './containers/Login';
+import Blog from './containers/Blog';
+import BlogPost from './containers/BlogPost';
+import Hero from './containers/Hero';
+import Contact from './containers/Contact';
+import Projects from './containers/Projects';
+import Skills from './containers/Skills';
 
-/* Key Components:
-1. Uses React Query for data fetching and caching
-2. Implements lazy loading for Blog and BlogPost components
-3. Sets up protected and public routes
-4. Uses Suspense for loading states
-*/
+// Auth Components
+// import ProtectedRoute from './components/ProtectedRoute';
 
-// QueryClient configuration - minimizes unnecessary refetches
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 1,                    // Only retry failed requests once
-      refetchOnWindowFocus: false, // Prevent refetching when window regains focus
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 1,
     },
   },
 });
 
-// Main application structure
-// - Wraps everything in QueryClientProvider for data management
-// - Uses Suspense for handling lazy-loaded components
-// - Implements a responsive layout with Tailwind CSS
-// - Routes are organized into public and protected sections
 
-function App() {
+export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ErrorBoundary>
-        <Suspense fallback={<div>Loading...</div>}>
+      <Router>
+        <ErrorBoundary>
           <div className="min-h-screen bg-gray-50">
             <Header />
-            <main className="pt-16">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/blog" element={<Blog />} />
-                <Route path="/blog/:slug" element={<BlogPost />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route element={<ProtectedRoute />}>
-                  <Route path="/dashboard" element={<Dashboard />} />
-                </Route>
-              </Routes>
-            </main>
+            <Suspense fallback={<LoadingSpinner />}>
+              <main className="pt-16">
+                <Routes>
+                  {/* Public Routes */}
+                  <Route path="/" element={<Hero />} />
+                  <Route path="/blog" element={<Blog />} />
+                  <Route path="/blog/:slug" element={<BlogPost />} />
+                  <Route path="/projects" element={<Projects />} />
+                  <Route path="/skills" element={<Skills />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/login" element={<Login />} />
+
+                  {/* Protected Routes */}
+                  <Route path="/admin" element={
+                    <ProtectedRoute>
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  } />
+                </Routes>
+              </main>
+            </Suspense>
           </div>
-        </Suspense>
-      </ErrorBoundary>
+        </ErrorBoundary>
+        <Toaster 
+          position="top-right"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: '#363636',
+              color: '#fff',
+            },
+            success: {
+              duration: 3000,
+              iconTheme: {
+                primary: '#4ade80',
+                secondary: '#fff',
+              },
+            },
+            error: {
+              duration: 5000,
+              iconTheme: {
+                primary: '#ef4444',
+                secondary: '#fff',
+              },
+            },
+          }}
+        />
+      </Router>
     </QueryClientProvider>
   );
 }
-
-export default App;
