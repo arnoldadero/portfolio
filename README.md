@@ -1,4 +1,4 @@
-# Portfolio Website
+# Mvuvi Portfolio
 
 A modern, responsive portfolio website built with React, TypeScript, and TailwindCSS showcasing projects, skills, and professional experience.
 
@@ -8,7 +8,7 @@ A modern, responsive portfolio website built with React, TypeScript, and Tailwin
     - Clean, responsive layout
     - Smooth animations and transitions
     - Gradient accents and blur effects
-    - Dark/light mode support
+    - Dark/light mode support (Future)
 
 - **Project Showcase**
     - GitHub integration showing live repositories
@@ -22,7 +22,7 @@ A modern, responsive portfolio website built with React, TypeScript, and Tailwin
     - Progress indicators for proficiency levels
     - Icon integration for technologies
 
-- **Blog Integration**
+- **Blog Integration (Future)** 
     - Markdown blog posts support
     - Social sharing capabilities
     - Author and metadata display
