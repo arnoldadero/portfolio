@@ -9,6 +9,7 @@ import { ArrowRight, Github, Linkedin, Mail } from "lucide-react";
 import Skills from './Skills';
 import Projects from './Projects';
 import Contact from './Contact';
+import AudioPlayer from '../components/AudioPlayer';
 
 export default function Hero() {
   const socialLinks = [
@@ -58,7 +59,8 @@ export default function Hero() {
               </div>
               
               {/* Social Links */}
-              <div className="flex gap-6">
+              <div className="flex gap-6 items-center">
+                <AudioPlayer />
                 {socialLinks.map((link) => (
                   <a
                     key={link.label}
