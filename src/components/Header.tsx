@@ -83,26 +83,9 @@ export default function Header() {
                 <Github className="w-5 h-5 text-gray-700 group-hover:text-gray-900 transition-colors" />
               </a>
 
-              {/* Upwork */}
-              <a 
-                href="https://www.upwork.com/freelancers/arnoldadero" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="group relative p-1.5 rounded-full hover:bg-[#6FDA44]/10 transition-colors duration-200"
-                aria-label="Hire me on Upwork"
-              >
-                <svg viewBox="0 0 32 32" className="w-5 h-5 text-[#6FDA44] transition-colors" fill="currentColor">
-                  <path d="M24.75 17.542c-1.469 0-2.849-.62-4.099-1.635l.302-1.432l.01-.057c.276-1.524 1.135-4.083 3.787-4.083c1.984 0 3.599 1.615 3.599 3.599c0 1.984-1.615 3.609-3.599 3.609zm0-10.849c-3.349 0-5.948 2.188-7.01 5.797c-1.615-2.427-2.839-5.333-3.557-7.792h-3.631v9.396c0 1.865-1.516 3.38-3.38 3.38s-3.38-1.516-3.38-3.38V4.698H.161v9.396c0 3.922 3.188 7.12 7.12 7.12s7.12-3.198 7.12-7.12v-1.573c.708 1.484 1.578 2.979 2.641 4.297l-2.24 10.547h3.724l1.625-7.651c1.422 0.911 3.047 1.484 4.599 1.484c3.974 0 7.214-3.25 7.214-7.224s-3.24-7.224-7.214-7.224z"/>
-                </svg>
-                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-y-0 translate-y-1 pointer-events-none whitespace-nowrap shadow-lg backdrop-blur-sm">
-                  <span className="font-medium">Hire me on Upwork</span>
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mt-1.5 border-[6px] border-transparent border-b-indigo-600"></div>
-                </div>
-              </a>
-
               {/* LinkedIn */}
-              <a 
-                href="https://www.linkedin.com/in/arnold-adero-49607955" 
+              <a
+                href="https://www.linkedin.com/in/arnold-adero-49607955"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-1.5 rounded-full hover:bg-[#0A66C2]/10 transition-colors duration-200"
@@ -111,13 +94,26 @@ export default function Header() {
                 <Linkedin className="w-5 h-5 text-[#0A66C2] transition-colors" />
               </a>
 
+              {/* Upwork */}
+              <a 
+                href="https://www.upwork.com/freelancers/~01f65b6f4d8c1e7b32" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="group relative p-1.5 rounded-full hover:bg-[#14A800]/10 transition-colors duration-200"
+                aria-label="Hire me on Upwork"
+              >
+                <svg viewBox="0 0 24 24" className="w-5 h-5 text-[#14A800] transition-colors" fill="currentColor">
+                  <path d="M18.561 13.158c-1.102 0-2.135-.467-3.074-1.227l.228-1.076.008-.042c.207-1.143.849-3.06 2.839-3.06 1.492 0 2.703 1.212 2.703 2.703-.001 1.489-1.212 2.702-2.704 2.702zm0-8.14c-2.539 0-4.51 1.649-5.31 4.366-1.22-1.834-2.148-4.036-2.687-5.892H7.828v7.112c-.002 1.406-1.141 2.546-2.547 2.546-1.405 0-2.543-1.14-2.543-2.546V3.492H0v7.112c0 2.914 2.37 5.303 5.281 5.303 2.913 0 5.283-2.389 5.283-5.303v-1.19c.529 1.107 1.182 2.229 1.974 3.221l-1.673 7.873h2.797l1.213-5.71c1.063.679 2.285 1.109 3.686 1.109 3 0 5.439-2.452 5.439-5.45 0-3-2.439-5.439-5.439-5.439z"/>
+                </svg>
+              </a>
+
               {/* Email */}
               <a 
-                href="mailto:arnold@mvuvi.co.ke" 
-                className="p-1.5 rounded-full hover:bg-gray-100 transition-colors duration-200"
-                aria-label="Email Contact"
+                href="mailto:arnold@mvuvi.co.ke"
+                className="p-1.5 rounded-full hover:bg-[#EA4335]/10 transition-colors duration-200"
+                aria-label="Email Me"
               >
-                <Mail className="w-5 h-5 text-gray-700 group-hover:text-gray-900 transition-colors" />
+                <Mail className="w-5 h-5 text-[#EA4335] transition-colors" />
               </a>
             </div>
           </nav>
@@ -169,19 +165,6 @@ export default function Header() {
                 <Github className="w-6 h-6" />
               </a>
 
-              {/* Upwork */}
-              <a 
-                href="https://www.upwork.com/freelancers/~01234567890" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-[#6FDA44] hover:text-[#5fc936] transition-colors p-1.5 hover:bg-[#6FDA44]/10 rounded-full"
-                aria-label="Upwork Profile"
-              >
-                <svg viewBox="0 0 32 32" className="w-6 h-6" fill="currentColor">
-                  <path d="M24.75 17.542c-1.469 0-2.849-.62-4.099-1.635l.302-1.432l.01-.057c.276-1.524 1.135-4.083 3.787-4.083c1.984 0 3.599 1.615 3.599 3.599c0 1.984-1.615 3.609-3.599 3.609zm0-10.849c-3.349 0-5.948 2.188-7.01 5.797c-1.615-2.427-2.839-5.333-3.557-7.792h-3.631v9.396c0 1.865-1.516 3.38-3.38 3.38s-3.38-1.516-3.38-3.38V4.698H.161v9.396c0 3.922 3.188 7.12 7.12 7.12s7.12-3.198 7.12-7.12v-1.573c.708 1.484 1.578 2.979 2.641 4.297l-2.24 10.547h3.724l1.625-7.651c1.422 0.911 3.047 1.484 4.599 1.484c3.974 0 7.214-3.25 7.214-7.224s-3.24-7.224-7.214-7.224z"/>
-                </svg>
-              </a>
-
               {/* LinkedIn */}
               <a 
                 href="https://www.linkedin.com/in/arnold-adero-49607955" 
@@ -191,6 +174,19 @@ export default function Header() {
                 aria-label="LinkedIn Profile"
               >
                 <Linkedin className="w-6 h-6" />
+              </a>
+
+              {/* Upwork */}
+              <a 
+                href="https://www.upwork.com/freelancers/~01f65b6f4d8c1e7b32" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-[#14A800] hover:text-[#0B8655] transition-colors p-1.5 hover:bg-[#14A800]/10 rounded-full"
+                aria-label="Upwork Profile"
+              >
+                <svg viewBox="0 0 24 24" className="w-6 h-6" fill="currentColor">
+                  <path d="M18.561 13.158c-1.102 0-2.135-.467-3.074-1.227l.228-1.076.008-.042c.207-1.143.849-3.06 2.839-3.06 1.492 0 2.703 1.212 2.703 2.703-.001 1.489-1.212 2.702-2.704 2.702zm0-8.14c-2.539 0-4.51 1.649-5.31 4.366-1.22-1.834-2.148-4.036-2.687-5.892H7.828v7.112c-.002 1.406-1.141 2.546-2.547 2.546-1.405 0-2.543-1.14-2.543-2.546V3.492H0v7.112c0 2.914 2.37 5.303 5.281 5.303 2.913 0 5.283-2.389 5.283-5.303v-1.19c.529 1.107 1.182 2.229 1.974 3.221l-1.673 7.873h2.797l1.213-5.71c1.063.679 2.285 1.109 3.686 1.109 3 0 5.439-2.452 5.439-5.45 0-3-2.439-5.439-5.439-5.439z"/>
+                </svg>
               </a>
 
               {/* Email */}

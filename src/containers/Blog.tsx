@@ -99,9 +99,9 @@ export default function Blog() {
                 >
                   Read more →
                 </a>
-                {post.socialLinks.facebook && (
+                {post.socialLinks?.facebook && (
                   <a 
-                    href={post.socialLinks.facebook}
+                    href={post.socialLinks?.facebook}
                     className="text-blue-600 hover:text-blue-700"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -109,9 +109,9 @@ export default function Blog() {
                     Share on Facebook
                   </a>
                 )}
-                {post.socialLinks.linkedin && (
+                {post.socialLinks?.linkedin && (
                   <a 
-                    href={post.socialLinks.linkedin}
+                    href={post.socialLinks?.linkedin}
                     className="text-blue-700 hover:text-blue-800"
                     target="_blank"
                     rel="noopener noreferrer"

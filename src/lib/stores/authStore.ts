@@ -60,15 +60,17 @@ export const useAuthStore = create<AuthState>((set) => ({
         isLoading: false,
         error: null,
       });
-    } catch (error: Error & { response?: { data?: { message?: string } } }) {
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      console.error('Login error:', err);
       localStorage.removeItem('auth_token');
       set({
         isAuthenticated: false,
         user: null,
         isLoading: false,
-        error: error.response?.data?.message || 'Login failed',
+        error: err.response?.data?.message || 'Login failed',
       });
-      throw error;
+      throw new Error(err.response?.data?.message || 'Login failed');
     }
   },
 

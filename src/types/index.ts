@@ -24,6 +24,10 @@ export interface Post {
   views: number;
   readTime: number;
   links?: string[];
+  socialLinks?: {
+    facebook?: string;
+    linkedin?: string;
+  };
 }
 
 export interface PostsResponse {

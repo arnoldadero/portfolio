@@ -16,13 +16,16 @@ export default function BlogPost() {
   });
 
   const handleShare = async (platform: 'facebook' | 'linkedin') => {
-    if (!post?.data.id) return;
+    if (!post?.data) return;
+    
+    const url = encodeURIComponent(window.location.href);
+    const title = encodeURIComponent(post.data.title);
     
     try {
       if (platform === 'facebook') {
-        await blogApi.shareToFacebook(post.data.id);
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
       } else {
-        await blogApi.shareToLinkedIn(post.data.id);
+        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}&title=${title}`, '_blank');
       }
     } catch (error) {
       console.error(`Error sharing to ${platform}:`, error);

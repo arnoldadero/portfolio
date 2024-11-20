@@ -1,5 +1,4 @@
 import React from 'react';
-import { useAuthStore } from '../lib/stores/authStore';
 
 export default function AdminDashboard() {
   // Remove unused user variable
