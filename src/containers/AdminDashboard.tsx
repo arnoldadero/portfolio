@@ -2,7 +2,8 @@ import React from 'react';
 import { useAuthStore } from '../lib/stores/authStore';
 
 export default function AdminDashboard() {
-  const { user } = useAuthStore();
+  // Remove unused user variable
+  // const { user } = useAuthStore();
 
   return (
     <div className="container mx-auto px-4 py-8">

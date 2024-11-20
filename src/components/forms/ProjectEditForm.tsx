@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X } from 'lucide-react';
@@ -19,7 +19,9 @@ export function ProjectEditForm({ project, onSuccess, onCancel }: ProjectEditFor
   const { register, handleSubmit, formState: { errors } } = useForm<ProjectFormData>({
     defaultValues: project ? {
       ...project,
-      technologies: project.technologies?.join(', ') || '',
+      technologies: Array.isArray(project.technologies) 
+        ? project.technologies.join(', ')
+        : project.technologies || '',
     } : {
       title: '',
       description: '',
@@ -38,7 +40,9 @@ export function ProjectEditForm({ project, onSuccess, onCancel }: ProjectEditFor
     mutationFn: (data: ProjectFormData) => {
       const formattedData = {
         ...data,
-        technologies: data.technologies.split(',').map(tech => tech.trim()),
+        technologies: typeof data.technologies === 'string' 
+          ? data.technologies.split(',').map(tech => tech.trim()).filter(Boolean)
+          : data.technologies,
       };
       return project 
         ? blogApi.updateProject(project.id, formattedData)

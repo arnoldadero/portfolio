@@ -34,8 +34,6 @@ export default function Blog() {
     });
   }, [isLoading, error, posts]);
 
-  const [localPosts, setLocalPosts] = React.useState<Post[]>([]);
-
   // Handle pagination
   if (isLoading) {
     return (

@@ -49,7 +49,18 @@ export interface Project {
   updatedAt: string;
 }
 
-export interface ProjectFormData extends Omit<Project, 'id' | 'createdAt' | 'updatedAt'> {}
+export interface ProjectFormData {
+  title: string;
+  description: string;
+  shortDescription: string;
+  imageUrl?: string;
+  technologies: string | string[];
+  githubUrl?: string;
+  liveUrl?: string;
+  isVisible: boolean;
+  category: string;
+  priority: number;
+}
 
 // Activity related types
 export interface Activity {

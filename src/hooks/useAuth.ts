@@ -14,7 +14,7 @@ export function useAuth(): AuthState {
 
   useEffect(() => {
     verifyAuth();
-  }, []);
+  }, [verifyAuth]);
 
   return {
     isAuthenticated,

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, MessageSquare, Send, Loader2, Phone } from 'lucide-react';
+import { Mail, MessageSquare, Send, Loader2 } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa'; // Import WhatsApp icon from react-icons
 
 export default function Contact() {

@@ -16,7 +16,7 @@ import {
   SiKubernetes,
   SiGit
 } from '@icons-pack/react-simple-icons';
-import { Code2, Database, Layout, Server } from 'lucide-react';
+import { Database, Layout, Server } from 'lucide-react';
 
 interface SkillItem {
   name: string;

@@ -18,14 +18,13 @@ export function DataTable<T extends { id?: number | string }>({
   onEdit,
   onDelete,
 }: DataTableProps<T>) {
-  const formatValue = (value: any) => {
-    if (value instanceof Date) {
-      return format(value, 'MMM dd, yyyy');
-    }
-    if (Array.isArray(value)) {
-      return value.join(', ');
-    }
-    return value?.toString() || '';
+  const formatValue = (value: unknown): string => {
+    if (value === null || value === undefined) return '';
+    if (typeof value === 'string') return value;
+    if (typeof value === 'number') return value.toString();
+    if (value instanceof Date) return format(value, 'PP');
+    if (Array.isArray(value)) return value.join(', ');
+    return String(value);
   };
 
   return (

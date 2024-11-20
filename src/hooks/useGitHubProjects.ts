@@ -1,6 +1,49 @@
 // src/hooks/useGitHubProjects.ts
 import { useQuery } from '@tanstack/react-query';
 
+interface GithubRepo {
+  id: string;
+  name: string;
+  description: string | null;
+  url: string;
+  homepageUrl: string | null;
+  languages: {
+    edges: Array<{
+      node: {
+        name: string;
+        color: string;
+      };
+      size: number;
+    }>;
+    totalSize: number;
+  };
+  repositoryTopics: {
+    nodes: Array<{
+      topic: {
+        name: string;
+      };
+    }>;
+  };
+  stargazerCount: number;
+  updatedAt: string;
+}
+
+interface ProcessedRepo {
+  id: string;
+  name: string;
+  description: string | null;
+  html_url: string;
+  homepage: string | null;
+  languages: Array<{
+    name: string;
+    color: string;
+    percentage: string;
+  }>;
+  topics: string[];
+  stargazers_count: number;
+  updated_at: string;
+}
+
 export const useGitHubProjects = (username: string) => {
   const token = import.meta.env.VITE_GITHUB_TOKEN;
   const headers = {
@@ -15,7 +58,7 @@ export const useGitHubProjects = (username: string) => {
       const pinnedReposQuery = `
         query {
           user(login: "${username}") {
-            pinnedItems(first: 3, types: REPOSITORY) {  // Changed from 6 to 3
+            pinnedItems(first: 3, types: REPOSITORY) {  
               nodes {
                 ... on Repository {
                   id
@@ -61,25 +104,25 @@ export const useGitHubProjects = (username: string) => {
         }
 
         const data = await graphqlResponse.json();
-        return data.data.user.pinnedItems.nodes.map((repo: any) => ({
+        return data.data.user.pinnedItems.nodes.map((repo: GithubRepo): ProcessedRepo => ({
           id: repo.id,
           name: repo.name,
           description: repo.description,
           html_url: repo.url,
           homepage: repo.homepageUrl,
-          languages: repo.languages.edges.map((edge: any) => ({
+          languages: repo.languages.edges.map(edge => ({
             name: edge.node.name,
             color: edge.node.color,
             percentage: (edge.size / repo.languages.totalSize * 100).toFixed(1)
           })),
-          topics: repo.repositoryTopics.nodes.map((topic: any) => topic.topic.name),
+          topics: repo.repositoryTopics.nodes.map(topic => topic.topic.name),
           stargazers_count: repo.stargazerCount,
           updated_at: repo.updatedAt
         }));
-      } catch (error) {
+      } catch {
         // Fallback to REST API if GraphQL fails
         const reposResponse = await fetch(
-          `https://api.github.com/users/${username}/repos?sort=updated&per_page=3`,  // Changed from 6 to 3
+          `https://api.github.com/users/${username}/repos?sort=updated&per_page=3`,  
           { headers }
         );
 
